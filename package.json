@@ -1,0 +1,18 @@
+{
+  "name": "onlykey3rd-party",
+  "version": "0.0.1",
+  "description": "",
+  "main": "dist/onlykey3rd-party.js",
+  "scripts": {
+    "build": "cross-env NODE_ENV=development webpack --devtool source-map --config webpack.config.js",
+    "build-min": "cross-env MINIFY=1 NODE_ENV=production webpack --devtool source-map --config webpack.config.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "express": "^4.17.1",
+    "webpack": "^5.52.0",
+    "webpack-cli": "^4.8.0"
+  }
+}

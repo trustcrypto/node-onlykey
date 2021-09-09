@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>onlykey</title>
+
+    <link href="./libs/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            padding-top: 5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+        <a class="navbar-brand" href="./">onlykey</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="navbar-collapse collapse justify-content-between" id="navbarNavDropdown">
+            <ul class="navbar-nav mr-auto" id="navbar-nav-left">
+
+            </ul>
+            <ul class="navbar-nav" id="navbar-nav-right">
+
+            </ul>
+        </div>
+    </nav>
+
+    <main role="main" class="container-fluid" id="main-container">
+        <!--<a id="NACL.js" href="javascript:void(0);" class="btn btn-primary startTestType">nacl.js</a><br/><br/>-->
+        <a id="P256R1" href="javascript:void(0);" class="btn btn-primary startTestType">P256R1</a><br/><br/>
+        <a id="P256R1-enc" href="javascript:void(0);" class="btn btn-primary startTestType">P256R1 (REQ_PRESS)</a><br/><br/>
+        <a id="CURVE25519" href="javascript:void(0);" class="btn btn-primary startTestType">CURVE25519</a><br/><br/>
+        <a id="CURVE25519-enc" href="javascript:void(0);" class="btn btn-primary startTestType">CURVE25519 (REQ_PRESS)</a><br/><br/>
+    </main>
+
+    <script src="./libs/jquery.js"></script>
+    <script src="./libs/gun.min.js"></script>
+    <script src="./libs/sea.js"></script>
+    <script src="./libs/bootstrap/js/bootstrap.bundle.js"></script>
+    <script data-main="./libs/setup" src="./libs/require.js"></script>
+    <script>
+        $(".startTestType").click(function(){
+            var _this = this; 
+            require(["./index.js"], function(index) {
+                index.start(_this.id)
+            });
+        
+        })
+    </script>
+
+</body>
+
+</html>
