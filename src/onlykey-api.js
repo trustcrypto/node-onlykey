@@ -33,8 +33,8 @@ function API() {
             args.push(arguments[i]);
         }
         args.join(" ");
-        $("#console_output").append($("<span/>").text(args.join(" ")));
-        $("#console_output").append($("<br/>"));
+        // $("#console_output").append($("<span/>").text(args.join(" ")));
+        // $("#console_output").append($("<br/>"));
     };
 
     function msg(i) {
@@ -45,7 +45,7 @@ function API() {
     var sha256 = async function(s) {
         var hash = await crypto.subtle.digest({
             name: 'SHA-256'
-        }, new window.TextEncoder().encode(s));
+        }, new TextEncoder().encode(s));
         hash = buf2hex(hash);
         hash = Array.from(hash.match(/.{2}/g).map(hexStrToDec));
         return hash;
@@ -82,6 +82,15 @@ function API() {
     function _setStatus(newStatus) {
         window._status = newStatus;
         log("Changed window._status to ", newStatus);
+    }
+
+    function toArrayBuffer(buf) {
+        var ab = new ArrayBuffer(buf.length);
+        var view = new Uint8Array(ab);
+        for (var i = 0; i < buf.length; ++i) {
+            view[i] = buf[i];
+        }
+        return ab;
     }
 
     function encode_ctaphid_request_as_keyhandle(cmd, opt1, opt2, opt3, data) {
@@ -140,11 +149,19 @@ function API() {
 
         debug_log('UNFORMATTED RESPONSE:', response);
 
-        var signature_count = (
-            new DataView(
-                response.authenticatorData.slice(33, 37)
-            )
-        ).getUint32(0, false); // get count as 32 bit BE integer
+        var signature_count;
+        if (window.navigator.vendor == "NODE") {
+            signature_count = (
+                new DataView(toArrayBuffer(Buffer.from(response.authenticatorData.slice(33, 37))))
+            ).getUint32(0, false); // get count as 32 bit BE integer
+        }
+        else {
+            signature_count = (
+                new DataView(
+                    response.authenticatorData.slice(33, 37)
+                )
+            ).getUint32(0, false); // get count as 32 bit BE integer
+        }
 
         var signature = new Uint8Array(response.signature);
         var data = null;
@@ -208,20 +225,40 @@ function API() {
 
         var keyhandle = encode_ctaphid_request_as_keyhandle(cmd, opt1, opt2, opt3, data);
         var challenge = window.crypto.getRandomValues(new Uint8Array(32));
+        // var request_options = {
+        //     challenge: challenge,
+        //     allowCredentials: [{
+        //         id: keyhandle,
+        //         type: 'public-key',
+        //     }],
+        //     timeout: timeout,
+        //     // rpId: 'apps.crp.to',
+        //     userVerification: 'discouraged',
+        //     //userPresence: 'false',
+        //     //mediation: 'silent',
+        //     // extensions: {
+        //     //  appid: 'https://apps.crp.to',
+        //     // },
+        // };
+
+        var id = window.location.hostname;
         var request_options = {
             challenge: challenge,
             allowCredentials: [{
+                transports: ["usb"],
                 id: keyhandle,
                 type: 'public-key',
             }],
             timeout: timeout,
-            // rpId: 'apps.crp.to',
+            //rpId: 'apps.crp.to',
+            rpId: id,
             userVerification: 'discouraged',
             //userPresence: 'false',
             //mediation: 'silent',
-            // extensions: {
-            //  appid: 'https://apps.crp.to',
-            // },
+            extensions: {
+                // appid: 'https://apps.crp.to',
+                appid: 'https://' + id
+            },
         };
 
         return window.navigator.credentials.get({
@@ -566,6 +603,7 @@ function API() {
         else if (!os && /Linux/.test(platform)) {
             os = 'Linux-' + vendor;
         }
+        else if (false) {}
 
         return os;
     }
