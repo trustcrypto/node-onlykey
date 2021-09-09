@@ -225,41 +225,49 @@ function API() {
 
         var keyhandle = encode_ctaphid_request_as_keyhandle(cmd, opt1, opt2, opt3, data);
         var challenge = window.crypto.getRandomValues(new Uint8Array(32));
-        // var request_options = {
-        //     challenge: challenge,
-        //     allowCredentials: [{
-        //         id: keyhandle,
-        //         type: 'public-key',
-        //     }],
-        //     timeout: timeout,
-        //     // rpId: 'apps.crp.to',
-        //     userVerification: 'discouraged',
-        //     //userPresence: 'false',
-        //     //mediation: 'silent',
-        //     // extensions: {
-        //     //  appid: 'https://apps.crp.to',
-        //     // },
-        // };
-
+        var request_options;
         var id = window.location.hostname;
-        var request_options = {
-            challenge: challenge,
-            allowCredentials: [{
-                transports: ["usb"],
-                id: keyhandle,
-                type: 'public-key',
-            }],
-            timeout: timeout,
-            //rpId: 'apps.crp.to',
-            rpId: id,
-            userVerification: 'discouraged',
-            //userPresence: 'false',
-            //mediation: 'silent',
-            extensions: {
-                // appid: 'https://apps.crp.to',
-                appid: 'https://' + id
-            },
-        };
+        
+        if(window.navigator.vendor == "NODE"){
+            request_options = {
+                challenge: challenge,
+                allowCredentials: [{
+                    transports: ["usb"],
+                    id: keyhandle,
+                    type: 'public-key',
+                }],
+                timeout: timeout,
+                //rpId: 'apps.crp.to',
+                rpId: id,
+                userVerification: 'discouraged',
+                //userPresence: 'false',
+                //mediation: 'silent',
+                // extensions: {
+                //     // appid: 'https://apps.crp.to',
+                //     appid: 'https://' + id
+                // },
+            };
+
+        }
+        else {
+            request_options = {
+                challenge: challenge,
+                allowCredentials: [{
+                    transports: ["usb"],
+                    id: keyhandle,
+                    type: 'public-key',
+                }],
+                timeout: timeout,
+                rpId: id,
+                userVerification: 'discouraged',
+                // userPresence: 'false',
+                //mediation: 'silent',
+                // extensions: {
+                //     // appid: 'https://apps.crp.to',
+                //     appid: 'https://' + id
+                // },
+            };
+        }
 
         return window.navigator.credentials.get({
             publicKey: request_options
