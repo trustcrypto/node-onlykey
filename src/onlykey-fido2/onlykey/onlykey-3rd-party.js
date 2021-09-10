@@ -220,8 +220,6 @@ module.exports = function(imports, onlykeyApi) {
                 }
                 response = response.data;
 
-                var data = await Promise;
-
                 var okPub = response.slice(0, 32);
                 // console.info("Onlykey transit public", okPub);
 
@@ -360,7 +358,8 @@ module.exports = function(imports, onlykeyApi) {
             
             if(keytype == KEYTYPE.P256R1 || keytype == KEYTYPE.P256K1)
                 pubkey = EPUB_TO_ONLYKEY_ECDH_P256(pubkey);
-
+            if (keytype == KEYTYPE.CURVE25519 || keytype == KEYTYPE.NACL) 
+                pubkey = decode_key(pubkey);
             // console.log("-------------------------------------------");
             // msg("Requesting OnlyKey Shared Secret");
             // $onStatus("Requesting OnlyKey Shared Secret");
@@ -412,8 +411,6 @@ module.exports = function(imports, onlykeyApi) {
                     return;
                 }
                 response = response.data;
-
-                // var data = await Promise;
 
                 var sharedPub;
                 var okPub = response.slice(0, 32);
@@ -471,7 +468,12 @@ module.exports = function(imports, onlykeyApi) {
 
             });
         };
-
+        
+        api.encode_key = encode_key;
+        api.decode_key = decode_key;
+        api.build_AESGCM = build_AESGCM;
+        api.nacl = nacl;
+        
         return api;
     }
 
