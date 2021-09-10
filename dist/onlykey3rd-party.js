@@ -3413,6 +3413,10 @@ API.prototype = new EventEmitter();
 
 module.exports = new API();
 
+if(!(typeof window == "undefined")){
+    window.ONLYKEY = module.exports;
+}
+
 
 /***/ })
 

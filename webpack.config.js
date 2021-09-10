@@ -21,8 +21,8 @@ module.exports = {
         path: path.resolve(__dirname, (process.env.OUT_DIR) ? process.env.OUT_DIR : './'),
         filename: './dist/onlykey3rd-party'+(minify ? ".min" : "")+'.js',
         library: {
-          name: 'ONLYKEY',
-          type: 'umd',
+              name: 'ONLYKEY',
+              type: 'umd',
         },
     },
     optimization: {
