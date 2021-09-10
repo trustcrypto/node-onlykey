@@ -15,7 +15,8 @@
     "btoa": "^1.2.1",
     "minimist": "^1.2.5",
     "node-hid": "^2.1.1",
-    "node-webcrypto-shim": "0.0.1"
+    "node-webcrypto-shim": "0.0.1",
+    "superagent": "^6.1.0"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",

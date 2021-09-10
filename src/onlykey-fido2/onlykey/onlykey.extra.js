@@ -1,18 +1,79 @@
 module.exports = function(imports) {
 
+  /* global TextEncoder */
+
   var console = imports.console;
 
   var forge = require("./forge.min.js");
 
   var $exports = {};
-  
+
   $exports.sha256 = function(s) {
     var md = forge.md.sha256.create();
     md.update($exports.bytes2string(s));
     return Array.from(md.digest().toHex().match(/.{2}/g).map($exports.hexStrToDec));
   };
 
+  $exports.async_sha256 = async function(s) {
+    var hash = await imports.window.crypto.subtle.digest({
+      name: 'SHA-256'
+    }, new TextEncoder().encode(s));
+    hash = $exports.buf2hex(hash);
+    hash = Array.from(hash.match(/.{2}/g).map($exports.hexStrToDec));
+    return hash;
+  };
+
   $exports.wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+  $exports.digestMessage = async function(message) {
+    const msgUint8 = new TextEncoder().encode(message); // encode as (utf-8) Uint8Array
+    const hashBuffer = await imports.window.crypto.subtle.digest('SHA-256', msgUint8);
+    const hashArray = Array.from(new Uint8Array(hashBuffer)); // convert buffer to byte array
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join(''); // convert bytes to hex string
+    return hashHex;
+  };
+
+  $exports.digestBuff = async function(buff) {
+    const msgUint8 = buff;
+    const hashBuffer = await imports.window.crypto.subtle.digest('SHA-256', msgUint8);
+    const hashArray = Array.from(new Uint8Array(hashBuffer)); // convert buffer to byte array
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join(''); // convert bytes to hex string
+    return hashHex;
+  };
+
+  $exports.digestArray = async function(buff) {
+    const msgUint8 = buff;
+    const hashBuffer = await imports.window.crypto.subtle.digest('SHA-256', msgUint8);
+    const hashArray = Array.from(new Uint8Array(hashBuffer)); // convert buffer to byte array
+    return hashArray;
+  };
+
+  $exports.arrayBufToBase64UrlDecode = function(ba64) {
+    var binary = $exports.u2f_unb64(ba64);
+    var bytes = [];
+    for (var i = 0; i < binary.length; i++) {
+      bytes.push(binary.charCodeAt(i));
+    }
+
+    return new Uint8Array(bytes);
+  }
+
+  $exports.arrayBufToBase64UrlEncode = function(buf) {
+    var binary = '';
+    var bytes = new Uint8Array(buf);
+    for (var i = 0; i < bytes.byteLength; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return imports.window.btoa(binary)
+      .replace(/\//g, '_')
+      .replace(/=/g, '')
+      .replace(/\+/g, '-');
+  }
+
+  $exports.buf2hex = function(buffer) {
+    // buffer is an ArrayBuffer
+    return Array.prototype.map.call(new Uint8Array(buffer), x => ('00' + x.toString(16)).slice(-2)).join('');
+  };
 
   $exports.string2bytes = function string2bytes(s) {
     var len = s.length;
@@ -23,7 +84,7 @@ module.exports = function(imports) {
 
   $exports.u2f_unb64 = function u2f_unb64(s) {
     s = s.replace(/-/g, '+').replace(/_/g, '/');
-    return window.atob(s + '==='.slice((s.length + 3) % 4));
+    return imports.window.atob(s + '==='.slice((s.length + 3) % 4));
   };
 
   $exports.IntToByteArray = function(int) {
@@ -47,7 +108,7 @@ module.exports = function(imports) {
   };
 
   $exports.u2f_b64 = function u2f_b64(s) {
-    return window.btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    return imports.window.btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
   };
 
   $exports.noop = function noop() {};
@@ -73,10 +134,10 @@ module.exports = function(imports) {
   //todo: move getAllUrlParams to pages plugin
   $exports.getAllUrlParams = function getAllUrlParams(url) {
     // get query string from url (optional) or window
-    var queryString = url ? url.split('?')[1] : window.location.search.slice(1);
+    var queryString = url ? url.split('?')[1] : imports.window.location.search.slice(1);
     // we'll store the parameters here
     var obj = {
-      "#": window.location.hash.split('#')[1]// add the hash
+      "#": imports.window.location.hash.split('#')[1] // add the hash
     };
     // if query string exists
     if (queryString) {
@@ -90,11 +151,11 @@ module.exports = function(imports) {
         // set parameter name and value (use 'true' if empty)
         var paramName = a[0];
         var paramValue = typeof(a[1]) === 'undefined' ? true : a[1];
-        
+
         // (optional) keep case consistent
         //paramName = paramName.toLowerCase();
         //if (typeof paramValue === 'string') paramValue = paramValue.toLowerCase();
-        
+
         // if the paramName ends with square brackets, e.g. colors[] or colors[2]
         if (paramName.match(/\[(\d+)?\]$/)) {
           // create key if it doesn't exist
@@ -133,13 +194,13 @@ module.exports = function(imports) {
   }
 
   $exports.getOS = function getOS() {
-    
-    if(typeof window == "undefined"){
+
+    if (typeof window == "undefined") {
       os = "Node";
       return os;
     }
-    var userAgent = window.navigator.userAgent,
-      platform = window.navigator.platform,
+    var userAgent = imports.window.navigator.userAgent,
+      platform = imports.window.navigator.platform,
       macosPlatforms = ['Macintosh', 'MacIntel', 'MacPPC', 'Mac68K'],
       windowsPlatforms = ['Win32', 'Win64', 'Windows', 'WinCE'],
       iosPlatforms = ['iPhone', 'iPad', 'iPod'],
@@ -213,8 +274,8 @@ module.exports = function(imports) {
     0x38: 'CTAP2_ERR_PIN_TOKEN_EXPIRED',
     0x39: 'CTAP2_ERR_REQUEST_TOO_LARGE',
   };
-  
-  
+
+
   var counter = 0;
   /**
    * Perform AES_256_GCM decryption using NACL shared secret
