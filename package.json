@@ -1,14 +1,15 @@
 {
-  "name": "onlykey3rd-party",
+  "name": "node-onlykey",
   "version": "0.0.1",
-  "description": "",
+  "description": "Onlykey Javascript Library",
   "main": "dist/onlykey3rd-party.js",
   "scripts": {
     "build": "cross-env NODE_ENV=development webpack --devtool source-map --config webpack.config.js",
     "build-min": "cross-env MINIFY=1 NODE_ENV=production webpack --devtool source-map --config webpack.config.js"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Bradley Matusiak",
+  "license": "Apache-2.0",
+  "repository": "github:trustcrypto/node-onlykey",
   "dependencies": {
     "@vincss-public-projects/fido2-client": "git+https://github.com/bmatusiak/FIDO2Client.git",
     "atob": "^2.1.2",
