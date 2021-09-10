@@ -9,8 +9,7 @@ var args = require('minimist')(process.argv.slice(2), {
     },
     default: {
         keytype: 1,
-        keypress: false,
-        _: ["test", "test2"]
+        keypress: false
     }
 });
 
@@ -68,14 +67,12 @@ var ONLYKEY = require("./onlykey-api.js");
 
 if (!args.sharedPub) {
     ONLYKEY.derive_public_key(args.aditional_seed_data, args.keytype, args.keypress, async function(err, key) {
-
-        console.log("epub: ", key)
+        console.log(JSON.stringify({epub: key}))
     });
 }
 else {
 
     ONLYKEY.derive_shared_secret(args.aditional_seed_data, args.sharedPub, args.keytype, args.keypress, async function(err, sharedSecret) {
-
-        console.log("sharedSecret: ", sharedSecret)
+        console.log(JSON.stringify({sharedSecret: sharedSecret}))
     });
 }

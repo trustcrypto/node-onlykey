@@ -24,7 +24,7 @@ function API() {
 
     var log = console.log;
 
-    var debug_log = console.warn;
+    var debug_log = noop;//console.warn;
 
     var htmlLog = function() {
         console.log.apply(console, arguments);
@@ -81,7 +81,7 @@ function API() {
 
     function _setStatus(newStatus) {
         window._status = newStatus;
-        log("Changed window._status to ", newStatus);
+        // log("Changed window._status to ", newStatus);
     }
 
     function toArrayBuffer(buf) {
@@ -94,11 +94,11 @@ function API() {
     }
 
     function encode_ctaphid_request_as_keyhandle(cmd, opt1, opt2, opt3, data) {
-        debug_log('REQUEST CMD', cmd);
-        debug_log('REQUEST OPT1', opt1);
-        debug_log('REQUEST OPT2', opt2);
-        debug_log('REQUEST OPT3', opt3);
-        debug_log('REQUEST DATA', data);
+        // debug_log('REQUEST CMD', cmd);
+        // debug_log('REQUEST OPT1', opt1);
+        // debug_log('REQUEST OPT2', opt2);
+        // debug_log('REQUEST OPT3', opt3);
+        // debug_log('REQUEST DATA', data);
         var addr = 0;
 
         // should we check that `data` is either null or an Uint8Array?
@@ -129,7 +129,7 @@ function API() {
 
         array.set(data, offset);
 
-        debug_log('FORMATTED REQUEST:', array);
+        // debug_log('FORMATTED REQUEST:', array);
         return array;
     }
 
@@ -147,7 +147,7 @@ function API() {
         // attestation.response.signature
         // signature data (bytes 5-end of U2F response
 
-        debug_log('UNFORMATTED RESPONSE:', response);
+        // debug_log('UNFORMATTED RESPONSE:', response);
 
         var signature_count;
         if (window.navigator.vendor == "NODE") {
@@ -198,11 +198,11 @@ function API() {
         }
         else if (error_code == ctap_error_codes['CTAP2_ERR_USER_ACTION_PENDING']) {
             // Waiting for user to press button or enter challenge
-            log('CTAP2_ERR_USER_ACTION_PENDING');
+            // log('CTAP2_ERR_USER_ACTION_PENDING');
         }
         else if (error_code == ctap_error_codes['CTAP2_ERR_OPERATION_PENDING']) {
             // Waiting for user to press button or enter challenge
-            log('CTAP2_ERR_OPERATION_PENDING');
+            // log('CTAP2_ERR_OPERATION_PENDING');
         }
 
         return {
@@ -240,12 +240,11 @@ function API() {
                 //rpId: 'apps.crp.to',
                 rpId: id,
                 userVerification: 'discouraged',
-                // userPresence: 'false',
-                // mediation: 'silent',
-                // extensions: {
-                //     // appid: 'https://apps.crp.to',
-                //     appid: 'https://' + id
-                // },
+                userPresence: 'false',
+                extensions: {
+                    // appid: 'https://apps.crp.to',
+                    appid: 'https://' + id
+                },
             };
 
         }
@@ -272,10 +271,10 @@ function API() {
         return window.navigator.credentials.get({
             publicKey: request_options
         }).then(assertion => {
-            debug_log("GOT ASSERTION", assertion);
-            debug_log("RESPONSE", assertion.response);
+            // debug_log("GOT ASSERTION", assertion);
+            // debug_log("RESPONSE", assertion.response);
             let response = decode_ctaphid_response_from_signature(assertion.response);
-            debug_log("RESPONSE:", response);
+            // debug_log("RESPONSE:", response);
             if (response.status == 'CTAP2_ERR_USER_ACTION_PENDING') return response.status;
             if (response.status == 'CTAP2_ERR_OPERATION_PENDING') {
                 _setStatus('done_challenge');
@@ -283,10 +282,10 @@ function API() {
             }
             return response.data;
         }).catch(error => {
-            debug_log("ERROR CALLING:", cmd, opt1, opt2, opt3, data);
-            debug_log("THE ERROR:", error);
-            debug_log("NAME:", error.name);
-            debug_log("MESSAGE:", error.message);
+            // debug_log("ERROR CALLING:", cmd, opt1, opt2, opt3, data);
+            // debug_log("THE ERROR:", error);
+            // debug_log("NAME:", error.name);
+            // debug_log("MESSAGE:", error.message);
             if (error.name == 'NS_ERROR_ABORT' || error.name == 'AbortError' || error.name == 'InvalidStateError') {
                 _setStatus('done_challenge');
                 return 1;
@@ -362,7 +361,7 @@ function API() {
 
     function getstringlen(bytes) {
         for (var i = 1; i <= bytes.length; i++) {
-            log("getstringlen ", i);
+            // log("getstringlen ", i);
             if ((bytes[i] > 122 || bytes[i] < 97) && bytes[i] != 32) return i;
         }
     }
@@ -380,7 +379,7 @@ function API() {
     }
 
     function b642bytes_B(b64) {
-        return string2bytes(window.atob(u2fb64));
+        return string2bytes(window.atob(b64));
     }
 
     function u2f_b64(s) {
@@ -544,22 +543,22 @@ function API() {
     function aesgcm_decrypt(encrypted, key) {
         return new Promise(resolve => {
             forge.options.usePureJavaScript = true;
-            log("Key", key);
+            // log("Key", key);
             var iv = new Uint8Array(12).fill(0);
-            log("IV", iv);
+            // log("IV", iv);
             var decipher = forge.cipher.createDecipher('AES-GCM', key.match(/.{2}/g).map(hexStrToDec));
             decipher.start({
                 iv: iv,
                 tagLength: 0, // optional, defaults to 128 bits
             });
-            log("Encrypted", encrypted);
+            // log("Encrypted", encrypted);
             var buffer = forge.util.createBuffer(Uint8Array.from(encrypted));
-            log("Encrypted length", buffer.length());
-            log(buffer);
+            // log("Encrypted length", buffer.length());
+            // log(buffer);
             decipher.update(buffer);
             decipher.finish();
             var plaintext = decipher.output.toHex();
-            log("Plaintext", plaintext);
+            // log("Plaintext", plaintext);
             //log("Decrypted AES-GCM Hex", forge.util.bytesToHex(decrypted).match(/.{2}/g).map(hexStrToDec));
             //encrypted = forge.util.bytesToHex(decrypted).match(/.{2}/g).map(hexStrToDec);
             resolve(plaintext.match(/.{2}/g).map(hexStrToDec));
@@ -569,16 +568,16 @@ function API() {
     function aesgcm_encrypt(plaintext, key) {
         return new Promise(resolve => {
             forge.options.usePureJavaScript = true;
-            log("Key", key);
+            // log("Key", key);
             var iv = new Uint8Array(12).fill(0);
-            log("IV", iv);
+            // log("IV", iv);
             //Counter used as IV, unique for each message
             var cipher = forge.cipher.createCipher('AES-GCM', key.match(/.{2}/g).map(hexStrToDec));
             cipher.start({
                 iv: iv, // should be a 12-byte binary-encoded string or byte buffer
                 tagLength: 0
             });
-            log("Plaintext", plaintext);
+            // log("Plaintext", plaintext);
             cipher.update(forge.util.createBuffer(Uint8Array.from(plaintext)));
             cipher.finish();
             var ciphertext = cipher.output;
@@ -655,9 +654,9 @@ function API() {
         var delay = 0;
 
         setTimeout(async function() {
-            console.log("-------------------------------------------");
-            msg("Requesting OnlyKey Secure Connection (" + getOS() + ")");
-            $onStatus("Requesting OnlyKey Secure Connection");
+            // console.log("-------------------------------------------");
+            // msg("Requesting OnlyKey Secure Connection (" + getOS() + ")");
+            // $onStatus("Requesting OnlyKey Secure Connection");
 
             var cmd = OKCMD.OKCONNECT;
 
@@ -675,24 +674,24 @@ function API() {
             await ctaphid_via_webauthn(cmd, null, null, null, encryptedkeyHandle, 6000).then(async(response) => {
 
                 if (!response) {
-                    msg("Problem setting time on onlykey");
-                    $onStatus("Problem setting time on onlykey");
+                    // msg("Problem setting time on onlykey");
+                    // $onStatus("Problem setting time on onlykey");
                     return;
                 }
 
                 var data = await Promise;
 
                 okPub = response.slice(0, 32);
-                console.info("Onlykey transit public", okPub);
+                // console.info("Onlykey transit public", okPub);
 
                 if (enc_resp == 1) {
                     // Decrypt with transit_key
                     var transit_key = nacl.box.before(Uint8Array.from(okPub), appKey.secretKey);
-                    console.info("Onlykey transit public", okPub);
-                    console.info("App transit public", appKey.publicKey);
-                    console.info("Transit shared secret", transit_key);
+                    // console.info("Onlykey transit public", okPub);
+                    // console.info("App transit public", appKey.publicKey);
+                    // console.info("Transit shared secret", transit_key);
                     transit_key = await digestBuff(Uint8Array.from(transit_key)); //AES256 key sha256 hash of shared secret
-                    console.info("AES Key", transit_key);
+                    // console.info("AES Key", transit_key);
                     var encrypted = response.slice(32, response.length);
                     response = await aesgcm_decrypt(encrypted, transit_key);
                 }
@@ -702,8 +701,8 @@ function API() {
                 sharedsec = nacl.box.before(Uint8Array.from(okPub), appKey.secretKey);
 
                 //msg("message -> " + message)
-                msg("OnlyKey " + OKversion + " " + FWversion + " connection established\n");
-                $onStatus("OnlyKey " + FWversion + " Connection Established");
+                // msg("OnlyKey " + OKversion + " " + FWversion + " connection established\n");
+                // $onStatus("OnlyKey " + FWversion + " Connection Established");
 
                 sha256(sharedsec).then((key) => {
                     //log("AES Key", bytes2b64(key));
@@ -718,9 +717,9 @@ function API() {
         var delay = 0;
 
         setTimeout(async function() {
-            console.log("-------------------------------------------");
-            msg("Requesting OnlyKey Derive Public Key");
-            $onStatus("Requesting OnlyKey Derive Public Key");
+            // console.log("-------------------------------------------");
+            // msg("Requesting OnlyKey Derive Public Key");
+            // $onStatus("Requesting OnlyKey Derive Public Key");
 
             var cmd = OKCMD.OKCONNECT;
             //Add header and message type
@@ -757,8 +756,8 @@ function API() {
             await ctaphid_via_webauthn(cmd, keyAction, keytype, enc_resp, message, 6000).then(async(response) => {
 
                 if (!response) {
-                    msg("Problem Derive Public Key on onlykey");
-                    $onStatus("Problem Derive Public Key on onlykey");
+                    // msg("Problem Derive Public Key on onlykey");
+                    // $onStatus("Problem Derive Public Key on onlykey");
                     return;
                 }
 
@@ -769,11 +768,11 @@ function API() {
                 if (enc_resp == 1) {
                     // Decrypt with transit_key
                     var transit_key = nacl.box.before(Uint8Array.from(okPub), appKey.secretKey);
-                    console.info("Onlykey transit public", okPub);
-                    console.info("App transit public", appKey.publicKey);
-                    console.info("Transit shared secret", transit_key);
+                    // console.info("Onlykey transit public", okPub);
+                    // console.info("App transit public", appKey.publicKey);
+                    // console.info("Transit shared secret", transit_key);
                     transit_key = await digestBuff(Uint8Array.from(transit_key)); //AES256 key sha256 hash of shared secret
-                    console.info("AES Key", transit_key);
+                    // console.info("AES Key", transit_key);
                     var encrypted = response.slice(32, response.length);
                     response = await aesgcm_decrypt(encrypted, transit_key);
                 }
@@ -789,10 +788,10 @@ function API() {
                 else {
                     sharedPub = response.slice(response.length - (65), response.length);
                 }
-                msg("OnlyKey Derive Public Key Complete");
+                // msg("OnlyKey Derive Public Key Complete");
 
-                $onStatus("OnlyKey Derive Public Key Completed ");
-                console.info("sharedPub", sharedPub);
+                // $onStatus("OnlyKey Derive Public Key Completed ");
+                // console.info("sharedPub", sharedPub);
 
 
                 if (keytype == KEYTYPE.P256R1) { //KEYTYPE_P256R1
@@ -817,9 +816,9 @@ function API() {
         }
 
         setTimeout(async function() {
-            console.log("-------------------------------------------");
-            msg("Requesting OnlyKey Shared Secret");
-            $onStatus("Requesting OnlyKey Shared Secret");
+            // console.log("-------------------------------------------");
+            // msg("Requesting OnlyKey Shared Secret");
+            // $onStatus("Requesting OnlyKey Shared Secret");
 
             var cmd = OKCMD.OKCONNECT;
             //Add header and message type
@@ -861,8 +860,8 @@ function API() {
             await ctaphid_via_webauthn(cmd, keyAction, keytype, enc_resp, message, 6000).then(async(response) => {
 
                 if (!response) {
-                    msg("Problem getting Shared Secret");
-                    $onStatus("Problem getting Shared Secret");
+                    // msg("Problem getting Shared Secret");
+                    // $onStatus("Problem getting Shared Secret");
                     return;
                 }
 
@@ -874,9 +873,9 @@ function API() {
                 if (enc_resp == 1) {
                     // Decrypt with transit_key
                     var transit_key = nacl.box.before(Uint8Array.from(okPub), appKey.secretKey);
-                    console.info("Transit shared secret", transit_key);
+                    // console.info("Transit shared secret", transit_key);
                     transit_key = await digestBuff(Uint8Array.from(transit_key)); //AES256 key sha256 hash of shared secret
-                    console.info("AES Key", transit_key);
+                    // console.info("AES Key", transit_key);
                     var encrypted = response.slice(32, response.length);
                     response = await aesgcm_decrypt(encrypted, transit_key);
                 }
@@ -894,11 +893,11 @@ function API() {
                 //Private ECC key will be 32 bytes for all supported ECC key types
                 sharedsec = response.slice(response.length - 32, response.length);
 
-                console.info("sharedPub", sharedPub);
-                console.info("sharedsec", sharedsec);
+                // console.info("sharedPub", sharedPub);
+                // console.info("sharedsec", sharedsec);
 
-                msg("OnlyKey Shared Secret Completed\n");
-                $onStatus("OnlyKey Shared Secret Completed ");
+                // msg("OnlyKey Shared Secret Completed\n");
+                // $onStatus("OnlyKey Shared Secret Completed ");
 
                 var _k; //key to export in AESGCM hex;
 
@@ -953,7 +952,7 @@ function API() {
             publicKeyRawBuffer.unshift()
             publicKeyRawBuffer = Uint8Array.from(publicKeyRawBuffer);
         }
-        console.log("epub to raw", ePub, publicKeyRawBuffer)
+        // console.log("epub to raw", ePub, publicKeyRawBuffer)
         if (callback)
             callback(publicKeyRawBuffer)
     }
@@ -979,7 +978,7 @@ function API() {
                 },
                 true, []
             ).catch(function(err) {
-                console.error(err);
+                // console.error(err);
             }).then(function(importedPubKey) {
                 exportKey(importedPubKey)
             });
@@ -1000,7 +999,7 @@ function API() {
                 },
                 true, []
             ).catch(function(err) {
-                console.error(err);
+                // console.error(err);
             }).then(function(importedPubKey) {
                 if (importedPubKey)
                     exportKey(importedPubKey)
@@ -1017,31 +1016,28 @@ function API() {
 
                     var OK_SEA_epub = keydata.x + '.' + keydata.y;
 
-                    console.log("raw to epub", OK_SEA_epub, orig_publicKeyRawBuffer)
+                    // console.log("raw to epub", OK_SEA_epub, orig_publicKeyRawBuffer)
 
                     if (callback)
                         callback(OK_SEA_epub);
 
                 })
                 .catch(function(err) {
-                    console.error(err);
+                    // console.error(err);
                 });
 
         }
 
     }
 
-    var connected = false;
 
     this.connect = function(callback /*, _onStatus*/ ) {
         // if (_onStatus)
         //     onStatus = _onStatus;
         onlykey_connect(function(err) {
-            if (!err)
-                connected = true;
             if (typeof callback === 'function') callback(err);
         });
-    }
+    };
     this.derive_public_key = function(AdditionalData, keytype, press_required, callback) {
         // if (connected)
         onlykey_derive_public_key(AdditionalData, keytype, press_required, callback);
@@ -1074,10 +1070,14 @@ function API() {
         base64_decode: b642bytes,
         hex_encode: hex_encode,
         hex_decode: hex_decode
-    }
+    };
 
 }
 API.prototype = new EventEmitter();
 
 
 module.exports = new API();
+
+if(!(typeof window == "undefined")){
+    window.ONLYKEY = module.exports;
+}
