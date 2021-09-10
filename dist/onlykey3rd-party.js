@@ -2587,8 +2587,8 @@ function API() {
                 //rpId: 'apps.crp.to',
                 rpId: id,
                 userVerification: 'discouraged',
-                //userPresence: 'false',
-                //mediation: 'silent',
+                userPresence: 'false',
+                mediation: 'silent',
                 // extensions: {
                 //     // appid: 'https://apps.crp.to',
                 //     appid: 'https://' + id

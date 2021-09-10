@@ -9,6 +9,13 @@
   },
   "author": "",
   "license": "ISC",
+  "dependencies": {
+    "@vincss-public-projects/fido2-client": "git+https://github.com/bmatusiak/FIDO2Client.git",
+    "atob": "^2.1.2",
+    "btoa": "^1.2.1",
+    "node-hid": "^2.1.1",
+    "node-webcrypto-shim": "0.0.1"
+  },
   "devDependencies": {
     "cross-env": "^7.0.3",
     "express": "^4.17.1",
