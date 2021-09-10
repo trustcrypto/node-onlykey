@@ -10,6 +10,7 @@
   "author": "Bradley Matusiak",
   "license": "Apache-2.0",
   "repository": "github:trustcrypto/node-onlykey",
+  "homepage": "https://github.com/trustcrypto/node-onlykey#readme"
   "dependencies": {
     "@vincss-public-projects/fido2-client": "git+https://github.com/bmatusiak/FIDO2Client.git",
     "atob": "^2.1.2",
