@@ -13,6 +13,7 @@
     "@vincss-public-projects/fido2-client": "git+https://github.com/bmatusiak/FIDO2Client.git",
     "atob": "^2.1.2",
     "btoa": "^1.2.1",
+    "minimist": "^1.2.5",
     "node-hid": "^2.1.1",
     "node-webcrypto-shim": "0.0.1"
   },
@@ -21,5 +22,8 @@
     "express": "^4.17.1",
     "webpack": "^5.52.0",
     "webpack-cli": "^4.8.0"
+  },
+  "bin": {
+    "onlykey": "./src/cli.js"
   }
 }
