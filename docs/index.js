@@ -20,7 +20,7 @@ define(function(require, exports, module) {
         start: function(testType) {
 
             console.log("onlykeyIndex");
-            require("/dist/onlykey3rd-party.js")(function(ONLYKEY) {
+            require("./dist/onlykey3rd-party.js")(function(ONLYKEY) {
                 
 
                 var onlykey;
