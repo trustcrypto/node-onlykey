@@ -6,18 +6,19 @@ plugins.push(require("./onlykey-fido2/plugin.js")); //load onlykey plugin for te
 
 plugins.push(require("./window.js")); //load replacement onlykey need for plugin
 
+plugins.push(require("./console/console.js")); //load replacement onlykey need for plugin
+
 var EventEmitter = require("events").EventEmitter;
 
 var architect = require("../libs/architect.js");
 
 
 plugins.push({
-    provides: ["app", "console"],
+    provides: ["app"],
     consumes: ["hub"],
     setup: function(options, imports, register) {
         register(null, {
-            app: new EventEmitter(),
-            console: console
+            app: new EventEmitter()
         });
     }
 });

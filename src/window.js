@@ -14,7 +14,7 @@ module.exports = {
         $window.atob = require("atob");
         $window.btoa = require("btoa");
         $window.location = {
-            hostname : "apps.crp.to"
+            hostname : process.env.DOMAIN || "apps.crp.to"
         }
         $window.navigator = {
             userAgent: "NODE",

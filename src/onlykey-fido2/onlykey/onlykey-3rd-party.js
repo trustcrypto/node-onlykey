@@ -79,6 +79,14 @@ module.exports = function(imports, onlykeyApi) {
     function EPUB_TO_ONLYKEY_ECDH_P256(ePub, callback) {
         var xdecoded = arrayBufToBase64UrlDecode(ePub.split(".")[0]);
         var ydecoded = arrayBufToBase64UrlDecode(ePub.split(".")[1]);
+        
+        var publicKeyRawBuffer = Uint8Array.from([].concat(Array.from(xdecoded)).concat(Array.from(ydecoded)).concat([0]));
+        
+        if (callback)
+            callback(publicKeyRawBuffer);
+            
+        return publicKeyRawBuffer;
+        /*
         var publicKeyRawBuffer = new Uint8Array(65);
         var h = -1;
         for (var i in xdecoded) {
@@ -100,6 +108,7 @@ module.exports = function(imports, onlykeyApi) {
             callback(publicKeyRawBuffer)
 
         return publicKeyRawBuffer;
+        */
     }
 
     async function ONLYKEY_ECDH_P256_to_EPUB(publicKeyRawBuffer, callback) {
@@ -227,6 +236,13 @@ module.exports = function(imports, onlykeyApi) {
                     var encrypted = response.slice(32, response.length);
                     response = await aesgcm_decrypt(encrypted, transit_key);
                 }
+                
+                //   transit_key = await digestBuff(Uint8Array.from(transit_key)); //AES256 key sha256 hash of shared secret
+                //   console.info("App AES Key", transit_key);
+                //   var encrypted  = response.slice(32, response.length);
+                //   onlykey_api.FWversion = bytes2string(response.slice(32+8, 32+20));
+                //   response = await aesgcm_decrypt(encrypted, transit_key);
+                //   onlykey_api.OKversion = response[32+19] == 99 ? 'Color' : 'Go';
 
                 var FWversion = bytes2string(response.slice(32 + 8, 32 + 20));
                 var OKversion = response[32 + 19] == 99 ? 'Color' : 'Go';
