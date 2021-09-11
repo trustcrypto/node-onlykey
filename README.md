@@ -1,9 +1,12 @@
-# onlykey-sea
-Get a Key: http://onlykey.io/sea
+# node-onlykey
+
+Get a Onlykey USB: [https://onlykey.io/sea](https://onlykey.io/sea)
+
+Live Demo for 3rd Party: [https://trustcrypto.github.io/node-onlykey/docs/](https://trustcrypto.github.io/node-onlykey/docs/)
 
 ------
 
-This is a 3rd Party API for onlykey
+3rd Party Support
 ---
 
 Supports
@@ -16,7 +19,11 @@ API
 ----
 
 ```js
-var ok = require("./onlykey-api.js");
+require("./dist/onlykey3rd-party.js")(function(ONLYKEY) {
+
+  var ok = ONLYKEY();
+
+})
 ```
 
 
