@@ -1,0 +1,129 @@
+<div>
+
+    <strong id="connection_status" class="float-right"></strong>
+    <h1>Onlykey Encrypt and Decrypt: P256R1 (SEA)</h1>
+    <hr/>
+    <div class="container">
+        <div id="disconnected">
+            <button class="btn btn-danger" id="connect_onlykey">Connect Onlykey</button>
+        </div>
+        <div id="connected_onlykey" style="display:none;">
+            
+            <label>Onlykey Additional Data:</label>
+            <input type="text" id="onlykey_additional_data" class="form-control" value="Onlykey Rocks!"/><br/>
+            <button class="btn btn-danger" id="derive_public_key">Derive Public Key</button>
+            <hr/>
+            <label>Onlykey PubKey :</label>
+            <input type="text" id="onlykey_pubkey" class="form-control"/>
+            <hr/>
+            <table style="width: 100%;">
+                <tr>
+                    <td><label>SEA Test Key:</label></td>
+                    <td>
+                        <textarea class="form-control" rows="5" id="sea_test_key">{"pub":"JtwRNfyZm2lJFlzb8FxB2EylEIMYi0_5CcllU1rK0tQ.pllCCKOmirtiEiCirOByd69V49wad7OPvOg5N2puh0c","priv":"pvNcbfyT58RxFMx-UBTZ_PaUPyLCoDOY9dRzs1SWnjo","epub":"MzmNPtcQU4X1T4unYSE7ncWY-4ulbb9dM3S9fWDqgYA.NRuj7mOpZngSOtcV8kwDJqLioUv8V2FIZ1lvNO5Ra2Q","epriv":"G7GkIiEQYb6XbTIY6iFFKmMurjHyGUPJsyTbEnMNIlg"}</textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td><label>SEA Test Shared Secret:</label></td>
+                    <td>
+                        <textarea class="form-control" rows="5" id="sea_test_shared_secret"></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td><label>Onlykey Test Shared Secret:</label></td>
+                    <td>
+                        <textarea class="form-control" rows="5" id="ok_test_shared_secret"></textarea>
+                    </td>
+                </tr>
+            </table>
+            <hr/>
+            <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="pills-encrypt-tab" data-toggle="pill" href="#pills-encrypt" role="tab" aria-controls="pills-encrypt" aria-selected="true">Encrypt</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="pills-decrypt-tab" data-toggle="pill" href="#pills-decrypt" role="tab" aria-controls="pills-decrypt" aria-selected="false">Decrypt</a>
+                </li>
+                <!--<li class="nav-item">-->
+                <!--    <a class="nav-link" id="pills-sign-tab" data-toggle="pill" href="#pills-sign" role="tab" aria-controls="pills-sign" aria-selected="false">Sign</a>-->
+                <!--</li>-->
+                <!--<li class="nav-item">-->
+                <!--    <a class="nav-link" id="pills-verify-tab" data-toggle="pill" href="#pills-verify" role="tab" aria-controls="pills-verify" aria-selected="false">Verify</a>-->
+                <!--</li>-->
+            </ul>
+            <div class="tab-content" id="pills-tabContent">
+                <div class="tab-pane fade show active" id="pills-encrypt" role="tabpanel" aria-labelledby="pills-encrypt-tab">
+                    <table style="width: 100%;">
+                        <tr>
+                            <td><label>Encrypt To PubKey:</label></td>
+                            <td><input type="text" id="encryptKey" class="form-control"/></td>
+                        </tr>
+                        <tr>
+                            <td><label>Input Data:</label></td>
+                            <td>
+                                <textarea class="form-control" rows="5" id="encryptData"></textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td><button class="btn btn-warning" id="encryptBTN">Encrypt</button></td>
+                        </tr>
+                    </table>
+
+                </div>
+                <div class="tab-pane fade" id="pills-decrypt" role="tabpanel" aria-labelledby="pills-decrypt-tab">
+                    <table style="width: 100%;">
+                        <tr>
+                            <td>Decrypt With PubKey:</td>
+                            <td><input type="text"  id="decryptKey" id="decryptKey"  class="form-control"/></td>
+                        </tr>
+                        <tr>
+                            <td>Input Data :</td>
+                            <td><textarea class="form-control" rows="5" id="decryptData"></textarea></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td><button class="btn btn-warning" id="decryptBTN">Decrypt</button></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="tab-pane fade" id="pills-sign" role="tabpanel" aria-labelledby="pills-sign-tab">
+                    <table style="width: 100%;">
+                        <tr>
+                            <td>Sign With Key :</td>
+                            <td><input type="text" /></td>
+                        </tr>
+                        <tr>
+                            <td>Input Data :</td>
+                            <td><textarea></textarea></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td><button class="btn btn-warning">Sign</button></td>
+                        </tr>
+                    </table>
+
+                </div>
+                <div class="tab-pane fade" id="pills-verify" role="tabpanel" aria-labelledby="pills-verify-tab">
+                    <table style="width: 100%;">
+                        <tr>
+                            <td>Verify With Key :</td>
+                            <td><input type="text" /></td>
+                        </tr>
+                        <tr>
+                            <td>Input Data :</td>
+                            <td><textarea></textarea></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td><button class="btn btn-warning">Verify</button></td>
+                        </tr>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+        <hr/>
+        <div id="console_output" class="border border-danger"></div>
+    </div>
+</div>
