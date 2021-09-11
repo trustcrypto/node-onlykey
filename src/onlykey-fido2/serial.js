@@ -12,22 +12,60 @@ var $hids = {};
 
 var color = {};
 
+// (function(){
+	 
+// 	// '\033\\[0;' + ansi + 'm
+	
+// 	var colorRGB = function(c) { return '\x1b[38;2;' + c + 'm'; };
+// 	var colorSwatch = {
+// 		"red": "255;0;0",
+// 		"orange": "255;165;0",
+// 		"yellow": "255;255;0",
+// 		"green": "50;205;50",
+// 		"teal": "0;128;128",
+// 		"blue": "0;0;255",
+// 		"purple": "128;0;128",
+// 		"white": "255;255;255",
+// 	};
+// 	for (var i in colorSwatch) {
+// 		color[i] = colorRGB(colorSwatch[i]);
+// 	}
+// })();
+
+
 (function(){
-	var colorRGB = function(c) { return '\x1b[38;2;' + c + 'm'; };
+	 
+	// '\033\\[0;' + ansi + 'm
+	
+	var colorRGB = function(c) { return '\033[0;3' + c + 'm'; };
 	var colorSwatch = {
-		"red": "255;0;0",
-		"orange": "255;165;0",
-		"yellow": "255;255;0",
-		"green": "50;205;50",
-		"teal": "0;128;128",
-		"blue": "0;0;255",
-		"purple": "128;0;128",
-		"white": "255;255;255",
+		"black": "0",
+		"red": "1",
+		"green": "2",
+		"yellow": "3",
+		"blue": "4",
+		"purple": "5",
+		"teal": "6",
+		"white": "7"
+		/*
+		'30': 'black',
+	  '31': 'red',
+	  '32': 'green',
+	  '33': 'yellow',
+	  '34': 'blue',
+	  '35': 'purple',
+	  '36': 'cyan',
+	  '37': 'white'
+		*/
 	};
 	for (var i in colorSwatch) {
 		color[i] = colorRGB(colorSwatch[i]);
 	}
 })();
+
+var output = [];
+var tail = "";
+
 
 
 function findHID(hid_interface) {
@@ -62,15 +100,19 @@ function findHID(hid_interface) {
 				var addNewLines = (hid_interface == 2 ? true : false);
 				var bfrstr = bytes2string(data);
 				if (bfrstr) {
-					if (addNewLines) {
-						process.stdout.write("\r\n");
-					}
-					process.stdout.write($color);
-					process.stdout.write(bfrstr);
-					process.stdout.write(color.white);
-					if (addNewLines) {
-						process.stdout.write("\r\n");
-					}
+					bfrstr = bfrstr.replace(/\r\n\r\n/gm, "\r\n")
+					var ba = (tail+bfrstr).split('\r\n');
+					tail = ba.pop();
+					output = output.concat(ba);
+					// if (addNewLines) {
+					// 	process.stdout.write("\r\n");
+					// }
+					// process.stdout.write($color);
+					// process.stdout.write(highlightText(bfrstr.replace(/\r\n\r\n/gm, "\r\n")));
+					// process.stdout.write(color.white);
+					// if (addNewLines) {
+					// 	process.stdout.write("\r\n");
+					// }
 				}
 			});
 			$hids[hid_interface].com.on('error', function(error) {
@@ -86,6 +128,13 @@ function findHID(hid_interface) {
 
 var looping = false;
 setInterval(function() {
+	
+	var o = output.shift();
+	
+	if(o){
+		process.stdout.write(highlightText(o.replace(/\r\n\r\n/gm, "\r\n")) + '\r\n');
+	}
+	
 	if (looping) return;
 	looping = true;
 	try {
@@ -94,12 +143,12 @@ setInterval(function() {
 	catch (e) {
 		console.log(e);
 	}
-	try {
-		loadInterface(2);
-	}
-	catch (e) {
-		console.log(e);
-	}
+	// try {
+	// 	loadInterface(2);
+	// }
+	// catch (e) {
+	// 	console.log(e);
+	// }
 	looping = false;
 }, 1);
 
@@ -137,3 +186,93 @@ rl.on('line', function(line) {
 });
 rl.setPrompt(prefix, prefix.length);
 rl.prompt();
+
+
+
+function highlightText(text){
+	
+	var textReplacement = {
+		"Sending FIDO response block": color.red,
+		"Sending transport response data": color.red,
+		"Sending data on OnlyKey via Webauthn": color.red,
+		"Stored Data for FIDO Response": color.red,
+		"DECRYPTED STATE": color.red,
+		"ENCRYPTED STATE": color.red,
+		"buffer": color.red,
+		"KEY": color.red,
+		"IV": color.red,
+		"INPUT": color.red,
+		
+		"FIDO Response": color.red,
+		"Shared Secret": color.red,
+		"Input Pubkey": color.red,
+		"Derived Private": color.red,
+		"Returned Public": color.red,
+		"Web derivation key": color.red,
+		"Compute of public key complete": color.red,
+		
+		"get_assertion time": color.red,
+		"saved": color.red,
+		"credentials": color.red,
+		"adding user details to output": color.red,
+		"sigder_sz": color.red,
+		"sigder": color.red,
+		"ctap_generate_rng": color.red,
+		"Computed Public": color.red,
+		"HKDF Key": color.red,
+		"salt": color.red,
+		"RPID hash": color.red,
+		"RPID": color.red,
+		"Other data": color.red,
+		"Read ECC Private Key": color.red,
+		"Reading nonce": color.red,
+		"Transit AES Key": color.red,
+		"Transit Shared Secret": color.red,
+		"IS EXT REQ": color.red,
+		"Keyhandle": color.red,
+		"stored_apprpid": color.red,
+		"rpid": color.red,
+		"stored_appid": color.red,
+		"OKCONNECT MESSAGE RECEIVE": color.red,
+		"UNLOCKED": color.red,
+		"Time Already Set": color.red,
+		"OnlyKey public": color.red,
+		"App public": color.red,
+		"Key": color.red,
+		"Generating random number of size": color.red,
+		"AES KEY": color.red,
+		"slot": color.red,
+		"hash": color.red,
+		"via Webauthn": color.red,
+		"_appid": color.red,
+		"Ctap buffer": color.red,
+		"Keyhandle": color.red,
+		"resulting order of creds": color.red,
+		"CTAP_pinProtocol": color.red,
+		"CTAP_options": color.red,
+		"GA_allowList": color.red,
+		"GA_clientDataHash": color.red,
+		"GA_rpId": color.red,
+		"CTAP_GET_ASSERTION": color.red,
+		"Received packet":color.red,
+		"Recv packet": color.red,
+		
+		"cbor output structure": color.red,
+		"cbor": color.red,
+		"AES": color.red,
+		"SLOT": color.red,
+		
+	}
+	
+	for(var i in textReplacement){
+		// if(text.indexOf(i) >= 0)
+			text = addTextwithColor(text, i,textReplacement[i]);
+	}
+	return text;	
+}
+
+function addTextwithColor(text, search, $color){
+	var regex = new RegExp(search, "g");
+	// mystring.replace(regex, "yay")); // alerts "hello yay test yay"
+	return text.replace(regex , $color + search + color.white);
+}
