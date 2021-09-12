@@ -10,6 +10,8 @@ var optimist = require('optimist')
 	.alias('slot', 's')
 	.describe('data', 'additional data')
 	.alias('data', 'd')
+	.describe('blob', 'blob data')
+	.alias('blob', 'b')
 	.describe('keytype', 'keytype')
 	.alias('keytype', 't')
 	.describe('help', 'Show Help')
@@ -79,6 +81,28 @@ const messages = {
 };
 
 
+const SLOTS = {
+	OKSETPIN: 225, //0xE1
+	OKSETSDPIN: 226, //0xE2
+	OKSETPIN2: 227, //0xE3
+	OKSETTIME: 228, //0xE4
+	OKGETLABELS: 229, //0xE5
+	OKSETSLOT: 230, //0xE6
+	OKWIPESLOT: 231, //0xE7
+	OKSETU2FPRIV: 232, //0xE8
+	OKWIPEU2FPRIV: 233, //0xE9
+	OKSETU2FCERT: 234, //0xEA
+	OKWIPEU2FCERT: 235, //0xEB
+	OKGETPUBKEY: 236,
+	OKSIGN: 237,
+	OKWIPEPRIV: 238,
+	OKSETPRIV: 239,
+	OKDECRYPT: 240,
+	OKRESTORE: 241,
+	OKFWUPDATE: 244,
+};
+
+
 //--PROCESS
 
 switch (argv.cmd) {
@@ -92,6 +116,10 @@ switch (argv.cmd) {
 
 	case 'getpub':
 		getPub();
+		break;
+		
+	case 'sign':
+		sign();
 		break;
 
 	default:
@@ -118,7 +146,7 @@ function findHID(hid_interface) {
 
 function sendMessage(com, options) {
 
-	var bytesPerMessage = 64;
+	// var bytesPerMessage = options.contents.length+8;
 
 	var msgId = typeof options.msgId === 'string' ? options.msgId.toUpperCase() : null;
 	var slotId = typeof options.slotId === 'number' || typeof options.slotId === 'string' ? options.slotId : null;
@@ -129,72 +157,112 @@ function sendMessage(com, options) {
 	// callback = typeof callback === 'function' ? callback : ()=>{} ;
 
 	var reportId = 0;
-	var bytes = new Uint8Array(bytesPerMessage);
-	var cursor = 0;
+	
+	var bytes = [].concat(messageHeader);
+	// var cursor = 0;
 
-	for (; cursor < messageHeader.length; cursor++) {
-		bytes[cursor] = messageHeader[cursor];
-	}
+	// for (; cursor < messageHeader.length; cursor++) {
+	// 	bytes[cursor] = messageHeader[cursor];
+	// }
 
-	if (msgId && messages[msgId]) {
-		bytes[cursor] = strPad(messages[msgId], 2, 0);
-		cursor++;
-	}
+	// if (msgId && messages[msgId]) {
+		bytes.push(messages[msgId]);
+	// 	cursor++;
+	// }
 
 	if (slotId !== null) {
-		bytes[cursor] = strPad(slotId, 2, 0);
-		cursor++;
+	// 	bytes[cursor] = strPad(slotId, 2, 0);
+		bytes.push(slotId);
+	// 	cursor++;
 	}
 
-	if (fieldId !== null) {
-		if (messageFields[fieldId]) {
-			bytes[cursor] = strPad(messageFields[fieldId], 2, 0);
-		}
-		else {
-			bytes[cursor] = fieldId;
-		}
+	// if (fieldId !== null) {
+	// 	if (messageFields[fieldId]) {
+	// 		bytes[cursor] = strPad(messageFields[fieldId], 2, 0);
+	// 	}
+	// 	else {
+	// 		bytes[cursor] = fieldId;
+	// 	}
 
-		cursor++;
-	}
+	// 	cursor++;
+	// }
 
-	if (!Array.isArray(contents)) {
-		switch (typeof contents) {
-			case 'string':
-				contents = contents.replace(/\\x([a-fA-F0-9]{2})/g, (match, capture) => {
-					return String.fromCharCode(parseInt(capture, 16));
-				});
+		// bytes = bytes.concat(contents);
+		
+	// if (!Array.isArray(contents)) {
+	// 	switch (typeof contents) {
+	// 		case 'string':
+	// 			contents = contents.replace(/\\x([a-fA-F0-9]{2})/g, (match, capture) => {
+	// 				return String.fromCharCode(parseInt(capture, 16));
+	// 			});
 
-				for (var i = 0; i < contents.length && cursor < bytes.length; i++) {
-					if (contents.charCodeAt(i) > 255) {
-						throw "I am not smart enough to decode non-ASCII data.";
-					}
-					bytes[cursor++] = contents.charCodeAt(i);
-				}
-				break;
-			case 'number':
-				if (contents < 0 || contents > 255) {
-					throw "Byte value out of bounds.";
-				}
-				bytes[cursor++] = contents;
-				break;
-		}
-	}
-	else {
-		contents.forEach(function(val) {
-			bytes[cursor++] = contentType === 'HEX' ? hexStrToDec(val) : val;
-		});
-	}
+	// 			for (var i = 0; i < contents.length && cursor < bytes.length; i++) {
+	// 				if (contents.charCodeAt(i) > 255) {
+	// 					throw "I am not smart enough to decode non-ASCII data.";
+	// 				}
+	// 				bytes[cursor++] = contents.charCodeAt(i);
+	// 			}
+	// 			break;
+	// 		case 'number':
+	// 			if (contents < 0 || contents > 255) {
+	// 				throw "Byte value out of bounds.";
+	// 			}
+	// 			bytes[cursor++] = contents;
+	// 			break;
+	// 	}
+	// }
+	// else {
+		// contents.forEach(function(val) {
+		// 	bytes[cursor++] = /*contentType === 'HEX' ? hexStrToDec(val) : */val;
+		// });
+	// }
 
-	var pad = 0;
-	for (; cursor < bytes.length;) {
-		bytes[cursor++] = pad;
-	}
+	// var pad = 0;
+	// for (; cursor < bytes.length;) {
+	// 	bytes[cursor++] = pad;
+	// }
 
-	console.info("SENDING " + msgId + " to connectionId " + this.connection + ":", bytes);
-
+	// var 
 	var messageA = Array.from(bytes);
+	console.info("SENDING " + msgId + " to connectionId " + com.path + ":");//, Buffer.from(messageA).toString("HEX").toUpperCase(),bytes);
+	
+	for (var i = 0; i < contents.length; i++) {
+		if(typeof contents[i] == "string")
+			contents[i] = parseInt(hexStrToDec(contents[i]),10);
+		else
+			contents[i] = contents[i];
+	}
+
+	console.log(contents)
 	messageA.unshift(reportId); //reportId
-	com.write(messageA);
+	
+	if(!contents){
+		
+		var temporary  = [].concat(messageA);
+	    var l = temporary.length;
+		console.log("SEND:",l,":",Buffer.from(temporary).toString("HEX").toUpperCase())
+	    console.log(temporary)
+		com.write(temporary);
+	}else{
+			
+		var i,j, temporary, chunk = (64 - messageA.length);
+		for (i = 0,j = contents.length; i < j; i += chunk) {
+		    temporary = [].concat(messageA).concat(contents.slice(i, i + chunk));
+		    // do whatever
+		    var l = temporary.length;
+		    
+			for (; 64 > temporary.length;) {
+			 	temporary.push(0);
+			}
+			
+		    console.log("SEND:",l,":",Buffer.from(temporary).toString("HEX").toUpperCase())
+		    console.log(temporary)
+			com.write(temporary);
+		}
+		
+	}
+
+	// com.write(messageA);
 
 }
 
@@ -205,6 +273,7 @@ function setTime() {
 
 	if (hid) {
 		var com = new nodeHID.HID(hid.path);
+		com.path = hid.path;
 
 		com.on("data", function(msg) {
 			var msg_string = bytes2string(msg);
@@ -243,16 +312,17 @@ function getPub() {
 
 	if (hid) {
 		var com = new nodeHID.HID(hid.path);
+		com.path = hid.path;
 
 		com.on("data", function(msg) {
-			var msg_string = bytes2string(msg);
+			// var msg_string = bytes2string(msg);
 
-			console.log(msg,msg_string);
+			console.log(msg,msg.toString("hex"));
 
 			com.close();
 		});
 		var crypto = require('crypto');
-		var slot = parseInt(argv.slot, 10);
+		var slot = argv.slot ? parseInt(argv.slot, 10) : 132; 
 		var hash;
 		
 		if(slot == 132){
@@ -260,14 +330,103 @@ function getPub() {
 		}else hash = '';
 		hash = Array.from(hash);
 		
+		console.log(Buffer.from(hash))
 		// console.log(hash instanceof Array,hash);
 		
-		hash.unshift(argv.keytype)
+		hash = [2].concat(hash);
+		
+		// if this_slot_id > 100:
+  //          if curve_name == 'curve25519':
+  //              data = '04' + data
+  //          elif curve_name == 'secp256k1':
+  //              # Not currently supported by agent, for future use
+  //              data = '03' + data
+  //          elif curve_name == 'nist256p1':
+  //              data = '02' + data
+  //          elif curve_name == 'ed25519':
+  //              data = '01' + data
+  //      else:
+  //          data = '00' + data
+            
+            
 		var options = {
 			contents: hash,
-			slotId: parseInt(argv.slot, 10),
+			slotId: parseInt(slot, 10),
 			msgId: 'OKGETPUBKEY'
 		};
+		console.log(options);
+		
+		sendMessage(com, options);
+
+		//console.log(hid);
+	}
+	else {
+		console.log("onlykey not detected");
+	}
+
+}
+
+
+
+function sign() {
+
+
+	var hid = findHID(2);
+
+	if (hid) {
+		var com = new nodeHID.HID(hid.path);
+		com.path = hid.path;
+		
+		com.on("data", function(msg) {
+			// var msg_string = bytes2string(msg);
+			
+			if(msg.toString("utf8").indexOf("Error device locked") == 0)
+				return;
+				
+			// console.log(msg,msg.toString("utf8"), msg.toString("hex"));
+			console.log(msg, msg.toString("hex"));
+
+			com.close();
+		});
+		var crypto = require('crypto');
+		var slot = argv.slot ? parseInt(argv.slot, 10) : 202; 
+		var hash = crypto.createHash('sha256').update(argv.data || "").digest();
+		var blob = crypto.createHash('sha256').update(argv.data/*+"lol"*/ || "").digest();
+		
+		// console.log(hash instanceof Array,hash);
+		
+		hash = Array.from(hash);
+		hash = [hash.length].concat(hash);
+		blob = Array.from(blob);//.slice(0,16);
+		blob = [blob.length].concat(blob);
+		
+		console.log(Buffer.from(blob))
+		console.log(Buffer.from(hash))
+		// return; 
+		// console.log(hash)
+		
+		// if this_slot_id > 100:
+  //          if curve_name == 'curve25519':
+  //              data = '04' + data
+  //          elif curve_name == 'secp256k1':
+  //              # Not currently supported by agent, for future use
+  //              data = '03' + data
+  //          elif curve_name == 'nist256p1':
+  //              data = '02' + data
+  //          elif curve_name == 'ed25519':
+  //              data = '01' + data
+  //      else:
+  //          data = '00' + data
+            
+            
+		var options = {
+			contents: [].concat(blob).concat(hash),
+			slotId: parseInt(slot, 10),
+			msgId: 'OKSIGN'
+		};
+		console.log(options);
+		// console.log(Buffer.from(options.contents).toString("HEX"));
+		
 		sendMessage(com, options);
 
 		//console.log(hid);
@@ -284,6 +443,7 @@ async function getLabels() {
 
 	if (hid) {
 		var com = new nodeHID.HID(hid.path);
+		com.path = hid.path;
 
 		var messCount = 0;
 
@@ -349,5 +509,12 @@ function bytes2string(bytes) {
 	}).join('');
 	return ret;
 };
+
+function string2bytes(s) {
+    var len = s.length;
+    var bytes = new Uint8Array(len);
+    for (var i = 0; i < len; i++) bytes[i] = s.charCodeAt(i);
+    return bytes;
+  };
 
 // };
