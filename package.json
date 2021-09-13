@@ -29,6 +29,6 @@
     "webpack-cli": "^4.8.0"
   },
   "bin": {
-    "onlykey": "./src/cli.js"
+    "node-onlykey": "./src/cli.js"
   }
 }
