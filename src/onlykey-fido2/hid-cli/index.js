@@ -1,7 +1,4 @@
-// module.exports = function() {
-var forge = require("node-forge");
 
-//-- commandline args
 var optimist = require('optimist')
 	.usage('Usage: $0 --cmd [cmd]')
 	.demand('cmd')
@@ -24,11 +21,7 @@ if (argv.help) {
 	return optimist.showHelp();
 }
 
-//-- INCLUDES
-
 const nodeHID = require('node-hid');
-
-//-- CONST / vars
 
 const messageHeader = [255, 255, 255, 255];
 
@@ -82,30 +75,6 @@ const messages = {
 };
 
 
-const SLOTS = {
-	OKSETPIN: 225, //0xE1
-	OKSETSDPIN: 226, //0xE2
-	OKSETPIN2: 227, //0xE3
-	OKSETTIME: 228, //0xE4
-	OKGETLABELS: 229, //0xE5
-	OKSETSLOT: 230, //0xE6
-	OKWIPESLOT: 231, //0xE7
-	OKSETU2FPRIV: 232, //0xE8
-	OKWIPEU2FPRIV: 233, //0xE9
-	OKSETU2FCERT: 234, //0xEA
-	OKWIPEU2FCERT: 235, //0xEB
-	OKGETPUBKEY: 236,
-	OKSIGN: 237,
-	OKWIPEPRIV: 238,
-	OKSETPRIV: 239,
-	OKDECRYPT: 240,
-	OKRESTORE: 241,
-	OKFWUPDATE: 244,
-};
-
-
-//--PROCESS
-
 switch (argv.cmd) {
 	case 'settime':
 		setTime();
@@ -133,10 +102,6 @@ switch (argv.cmd) {
 
 }
 
-
-
-//-- FUNCTIONS
-
 function findHID(hid_interface) {
 	var hids = nodeHID.devices();
 
@@ -151,86 +116,18 @@ function findHID(hid_interface) {
 
 function sendMessage(com, options) {
 
-	// var bytesPerMessage = options.contents.length+8;
-
 	var msgId = typeof options.msgId === 'string' ? options.msgId.toUpperCase() : null;
 	var slotId = typeof options.slotId === 'number' || typeof options.slotId === 'string' ? options.slotId : null;
-	var fieldId = typeof options.fieldId === 'string' || typeof options.fieldId === 'number' ? options.fieldId : null;
 	var contents = typeof options.contents === 'number' || (options.contents && options.contents.length) ? options.contents : '';
-	var contentType = (options.contentType && options.contentType.toUpperCase()) || 'HEX';
-
-	// callback = typeof callback === 'function' ? callback : ()=>{} ;
-
+	
 	var reportId = 0;
 
 	var bytes = [].concat(messageHeader);
-	// var cursor = 0;
-
-	// for (; cursor < messageHeader.length; cursor++) {
-	// 	bytes[cursor] = messageHeader[cursor];
-	// }
-
-	// if (msgId && messages[msgId]) {
+	
 	bytes.push(messages[msgId]);
-	// 	cursor++;
-	// }
-
-	// if (slotId !== null) {
-	// 	// 	bytes[cursor] = strPad(slotId, 2, 0);
-	// 	bytes.push(slotId);
-	// 	// 	cursor++;
-	// }
-
-	// if (fieldId !== null) {
-	// 	if (messageFields[fieldId]) {
-	// 		bytes[cursor] = strPad(messageFields[fieldId], 2, 0);
-	// 	}
-	// 	else {
-	// 		bytes[cursor] = fieldId;
-	// 	}
-
-	// 	cursor++;
-	// }
-
-	// bytes = bytes.concat(contents);
-
-	// if (!Array.isArray(contents)) {
-	// 	switch (typeof contents) {
-	// 		case 'string':
-	// 			contents = contents.replace(/\\x([a-fA-F0-9]{2})/g, (match, capture) => {
-	// 				return String.fromCharCode(parseInt(capture, 16));
-	// 			});
-
-	// 			for (var i = 0; i < contents.length && cursor < bytes.length; i++) {
-	// 				if (contents.charCodeAt(i) > 255) {
-	// 					throw "I am not smart enough to decode non-ASCII data.";
-	// 				}
-	// 				bytes[cursor++] = contents.charCodeAt(i);
-	// 			}
-	// 			break;
-	// 		case 'number':
-	// 			if (contents < 0 || contents > 255) {
-	// 				throw "Byte value out of bounds.";
-	// 			}
-	// 			bytes[cursor++] = contents;
-	// 			break;
-	// 	}
-	// }
-	// else {
-	// contents.forEach(function(val) {
-	// 	bytes[cursor++] = /*contentType === 'HEX' ? hexStrToDec(val) : */val;
-	// });
-	// }
-
-	// var pad = 0;
-	// for (; cursor < bytes.length;) {
-	// 	bytes[cursor++] = pad;
-	// }
-
-	// var 
-	var messageA; // = Array.from(bytes);
-	// console.info("SENDING " + msgId + " to connectionId " + com.path + ":");//, Buffer.from(messageA).toString("HEX").toUpperCase(),bytes);
-
+	
+	var messageA, temporary;
+	
 	for (var i = 0; i < contents.length; i++) {
 		if (typeof contents[i] == "string")
 			contents[i] = parseInt(hexStrToDec(contents[i]), 10);
@@ -238,28 +135,23 @@ function sendMessage(com, options) {
 			contents[i] = contents[i];
 	}
 
-	// console.log(contents)
-	// messageA.unshift(reportId); //reportId
-
 	if (!contents) {
 
 		if (slotId !== null) {
-			// 	bytes[cursor] = strPad(slotId, 2, 0);
 			bytes.push(slotId);
-			// 	cursor++;
 		}
 		messageA = Array.from(bytes);
-		var temporary = [].concat(messageA);
-		var l = temporary.length;
-		// console.log("SEND:",l,":",Buffer.from(temporary).toString("HEX").toUpperCase())
-		// console.log(temporary)
+		temporary = [].concat(messageA);
+		for (; 64 > temporary.length;) {
+			temporary.push(0);
+		}
 		com.write([reportId].concat(temporary));
 	}
 	else {
 		messageA = Array.from(bytes);
 		if (contents.length > 57) {
 			var chunkLen = (64 - messageA.length) - 2;
-			var i, j, temporary, chunk = chunkLen;
+			var i, j, chunk = chunkLen;
 			for (i = 0, j = contents.length; i < j; i += chunk) {
 				var _chunk = contents.slice(i, i + chunk);
 
@@ -268,28 +160,20 @@ function sendMessage(com, options) {
 				for (; 64 > temporary.length;) {
 					temporary.push(0);
 				}
-
-				// console.log("SEND:",l,":",Buffer.from(temporary).toString("HEX").toUpperCase())
-				// console.log(Uint8Array.from(temporary))
+				
 				com.write([reportId].concat(temporary));
 			}
 		}
 		else {
 			if (slotId !== null) {
-				// 	bytes[cursor] = strPad(slotId, 2, 0);
 				bytes.push(slotId);
-				// 	cursor++;
 			}
 			messageA = Array.from(bytes);
 			temporary = [].concat(messageA).concat(contents);
-			// console.log(temporary)
 			com.write([reportId].concat(temporary));
 		}
 
 	}
-
-	// com.write(messageA);
-
 }
 
 function setTime() {
@@ -341,16 +225,11 @@ function getPub(done) {
 		com.path = hid.path;
 
 		com.on("data", function(msg) {
-			// var msg_string = bytes2string(msg);
-
+			
 			msg = Array.from(msg);
 
 			msg = msg.splice(0, 32);
 			msg = Buffer.from(msg);
-			// console.log(Uint8Array.from(msg))
-
-			// console.log(msg)
-			// console.log(msg.toString("base64"));
 
 			com.close();
 
@@ -368,35 +247,16 @@ function getPub(done) {
 		else hash = '';
 		hash = Array.from(hash);
 
-		// console.log(Buffer.from(hash))
-		// console.log(hash instanceof Array,hash);
-
 		hash = [1].concat(hash);
-
-		// if this_slot_id > 100:
-		//          if curve_name == 'curve25519':
-		//              data = '04' + data
-		//          elif curve_name == 'secp256k1':
-		//              # Not currently supported by agent, for future use
-		//              data = '03' + data
-		//          elif curve_name == 'nist256p1':
-		//              data = '02' + data
-		//          elif curve_name == 'ed25519':
-		//              data = '01' + data
-		//      else:
-		//          data = '00' + data
-
 
 		var options = {
 			contents: hash,
 			slotId: parseInt(slot, 10),
 			msgId: 'OKGETPUBKEY'
 		};
-		// console.log(options);
 
 		sendMessage(com, options);
 
-		//console.log(hid);
 	}
 	else {
 		console.log("onlykey not detected");
@@ -416,22 +276,14 @@ function sign(done) {
 		com.path = hid.path;
 
 		com.on("data", function(msg) {
-			// var msg_string = bytes2string(msg);
 
 			if (msg.toString("utf8").indexOf("Error device locked") == 0)
 				return;
-
-			// console.log(msg,msg.toString("utf8"), msg.toString("hex"));
-			// console.log(msg, msg.toString("base64"));
-
-
+				
 			msg = Array.from(msg);
 
 			msg = msg.splice(0, 64);
 			msg = Buffer.from(msg);
-
-			// console.log(msg)
-			// console.log(msg.toString("base64"));
 
 			com.close();
 
@@ -443,45 +295,21 @@ function sign(done) {
 		var slot = argv.slot ? parseInt(argv.slot, 10) : 201;
 		var hash = crypto.createHash('sha256').update(argv.data || "").digest();
 		var blob = crypto.createHash('sha256').update(argv.blob /*+"lol"*/ || "").digest(); //.toString("hex");
-		// blob = Buffer.from(blob)
-		// console.log(hash instanceof Array,hash);
-
-		// console.log("blob", argv.blob, blob, Uint8Array.from(blob))
+		
+		
 		hash = Array.from(hash);
 		hash = [].concat(hash);
 		blob = Array.from(Buffer.from(blob)); //.slice(0,16);
 		blob = [].concat(blob);
-
-		var cont = [].concat(blob).concat(hash);
-		// console.log(Buffer.from(hash))
-		// return; 
-		// console.log(hash)
-
-		// if this_slot_id > 100:
-		//          if curve_name == 'curve25519':
-		//              data = '04' + data
-		//          elif curve_name == 'secp256k1':
-		//              # Not currently supported by agent, for future use
-		//              data = '03' + data
-		//          elif curve_name == 'nist256p1':
-		//              data = '02' + data
-		//          elif curve_name == 'ed25519':
-		//              data = '01' + data
-		//      else:
-		//          data = '00' + data
-
 
 		var options = {
 			contents: [].concat(blob).concat(hash),
 			slotId: parseInt(slot, 10),
 			msgId: 'OKSIGN'
 		};
-		// console.log(options);
-		// console.log(Buffer.from(options.contents).toString("HEX"));
-
+	
 		sendMessage(com, options);
 
-		//console.log(hid);
 	}
 	else {
 		console.log("onlykey not detected");
@@ -550,45 +378,18 @@ async function dotest() {
 			var md = forge.md.sha256.create();
 			md.update(data, 'utf8');
 			md = Uint8Array.from(Buffer.from(md.digest().toHex(), "hex"));
-			// md = Uint8Array.from([]);
-
-			// var md = Uint8Array.from(Buffer.from("test","utf8"));
-			// console.log(md.length, md);
 
 			var _sig = Uint8Array.from(Buffer.from(sig, 'base64'))
-			// console.log(_sig.length, _sig);
 
 			var pk = Uint8Array.from(Buffer.from(pub, 'base64'));
-			// var pk = Uint8Array.from(Buffer.from('HmKCPaVEiXwmDNE4KOXE7MYV0dyysXSgJpWdrY/5ErA=', 'base64'));
-			// console.log(pk.length, pk)
-
 
 			console.log("i have pub", pub)
 			console.log("i have sig", sig)
-			
-			
 			console.log("TEST", nacl.sign.detached.verify(md, _sig, pk) ? "PASSED" : "FAILED")
-
-
-
-
-
 
 		});
 	})
 }
-
-const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
-
-
-function strPad(str, places, char) {
-	while (str.length < places) {
-		str = "" + (char || 0) + str;
-	}
-
-	return str;
-}
-
 
 function hexStrToDec(hexStr) {
 	return new Number('0x' + hexStr).toString(10);
@@ -603,12 +404,3 @@ function bytes2string(bytes) {
 	}).join('');
 	return ret;
 };
-
-function string2bytes(s) {
-	var len = s.length;
-	var bytes = new Uint8Array(len);
-	for (var i = 0; i < len; i++) bytes[i] = s.charCodeAt(i);
-	return bytes;
-};
-
-// };
