@@ -192,7 +192,7 @@ rl.prompt();
 function highlightText(text){
 	
 	var textReplacement = {
-		"Sending FIDO response block": color.red,
+		"Sending FIDO response block": color.green,
 		"Sending transport response data": color.red,
 		"Sending data on OnlyKey via Webauthn": color.red,
 		"Stored Data for FIDO Response": color.red,
@@ -254,19 +254,36 @@ function highlightText(text){
 		"GA_clientDataHash": color.red,
 		"GA_rpId": color.red,
 		"CTAP_GET_ASSERTION": color.red,
-		"Received packet":color.red,
-		"Recv packet": color.red,
+		"Received packet":color.green,
+		"Recv packet": color.yellow,
 		
 		"cbor output structure": color.red,
 		"cbor": color.red,
 		"AES": color.red,
 		"SLOT": color.red,
-		
+		"Ignoring U2F check request": color.red
 	}
 	
 	for(var i in textReplacement){
 		// if(text.indexOf(i) >= 0)
 			text = addTextwithColor(text, i,textReplacement[i]);
+		
+		if(text.split(": ")[0] == "HEX"){
+			var hex_str = text.split(": ")[1].split(" ");
+			var hexAr = [];
+			for(var i in hex_str){
+				if(hex_str[i].length == 0) continue;
+				if(hex_str[i].length == 1)
+					hex_str[i] = "0"+hex_str[i];
+				
+				var v = hex_str[i];
+				hex_str[i] = parseInt(hex_str[i], 16);
+				hex_str[i] = color.yellow + hex_str[i]+color.white;
+				hexAr.push(hex_str[i]);
+			}
+			text = "["+hexAr.join(",")+"]"
+		}
+		
 	}
 	return text;	
 }
