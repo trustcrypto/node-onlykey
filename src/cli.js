@@ -2,6 +2,27 @@
 
 // module.exports = function(callback) {
 
+var args = require('minimist')(process.argv.slice(2), {
+    // '--': true,
+    boolean: ["keypress", "serial"],
+    alias: {
+        keytype: "t",
+        keypress: "p"
+    },
+    default: {
+        keytype: 1,
+        keypress: false,
+
+        serial: false
+    }
+});
+
+
+if (args.serial) {
+    require("./serial.js");
+    return;
+}
+
 var plugins = [];
 
 plugins.push(require("./onlykey-fido2/plugin.js")); //load onlykey plugin for testing
@@ -40,18 +61,6 @@ architect.createApp(plugins, function(err, app) {
 
     // callback(null, app);
 
-    var args = require('minimist')(process.argv.slice(2), {
-        // '--': true,
-        boolean: ["keypress"],
-        alias: {
-            keytype: "t",
-            keypress: "p"
-        },
-        default: {
-            keytype: 1,
-            keypress: false
-        }
-    });
 
 
     args.aditional_seed_data = args._[0] || "Onlykey Rocks!";
