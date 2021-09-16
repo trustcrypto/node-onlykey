@@ -76,11 +76,11 @@ ok.derive_shared_secret(AdditionalData, jwk_epub, keyType, press_required, funct
 How It Works
 -----------
 
-OnlyKey uses the RPID provided from FIDO2 (the origin url), the input public key `jwk_epub`, and any additional data `AdditionalData` such as a username to generate a public/private keypair. OnlyKey returns the public key with `derive_public_key` and returns the shared secret of "input public/generated private" with `derive_shared_secret`. 
+OnlyKey uses the RPID provided from FIDO2 (the origin url), the input public key `jwk_epub`, and any additional data `AdditionalData` such as a username to generate a public/private keypair. OnlyKey returns the public key with `derive_public_key()` and returns the shared secret of "input public/generated private" with `derive_shared_secret()`. 
 
 Single-User Application - This shared secret can be used for encryption and signing purposes. Given the same inputs and the same web site origin the same shared secret can be recreated. 
 
-Multi-User Application - Like a typical ECDH key exchange, both USERA and USERB obtain hardware generated public keys with `derive_public_key`, these public keys are exchanged and used as input public key for `derive_shared_secret`. Each user generates the same shared secret which can be used for encryption and signing purposes between USERA and USERB.
+Multi-User Application - Like a typical ECDH key exchange, both USERA and USERB obtain hardware generated public keys with `derive_public_key()`, these public keys are exchanged and used as input public key for `derive_shared_secret()`. Each user generates the same shared secret which can be used for encryption and signing purposes between USERA and USERB.
 
 API Authors
 -----------
