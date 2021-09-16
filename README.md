@@ -47,16 +47,16 @@ Methods
 ```js
 ok.connect(function() {})
 ```
-_connect does ECDH for secure session using NACL and informs hardware of current time, OS, and browser.
+`connect()` does ECDH for secure session using NACL and informs hardware of current time, OS, and browser.
 
 
 ```js
 ok.derive_public_key(AdditionalData, keyType, press_required, function(error, jwk_epub) {})
 ```
 
-_derive_public_key does _connect and returns a hardware generated public key from OnlyKey
+`derive_public_key()` does `connect()` and returns a hardware generated public key from OnlyKey
 
-```
+```js
 ok.derive_shared_secret(AdditionalData, jwk_epub, keyType, press_required, function(error, shared_secret) {})
 ```
 
