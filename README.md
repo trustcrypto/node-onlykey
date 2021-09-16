@@ -60,7 +60,7 @@ ok.derive_public_key(AdditionalData, keyType, press_required, function(error, jw
 ok.derive_shared_secret(AdditionalData, jwk_epub, keyType, press_required, function(error, shared_secret) {})
 ```
 
-_derive_shared_secret does _connect and returns a hardware generated shared secret from OnlyKey that can be used as private key for encryption/signing
+`derive_shared_secret()` does `connect()` and returns a hardware generated shared secret from OnlyKey that can be used as private key for encryption/signing
 
 *   `additional_d` = `string` or `buffer` to point to a derived key
 *   `jwk_epub` = input public key in jwk format
