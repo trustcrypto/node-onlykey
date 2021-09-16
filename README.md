@@ -2,7 +2,7 @@
 
 Get a Onlykey USB: [https://onlykey.io/sea](https://onlykey.io/sea)
 
-Live Demo for 3rd Party: [https://trustcrypto.github.io/node-onlykey/docs/](https://trustcrypto.github.io/node-onlykey/docs/)
+Live Demo for 3rd Party: [https://docs.crp.to/node-onlykey/docs/](https://docs.crp.to/node-onlykey/docs/)
 
 ------
 
