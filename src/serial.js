@@ -127,12 +127,21 @@ function findHID(hid_interface) {
 }
 
 var looping = false;
+
+var hideDupeLines = false;
+var lastLine;
 setInterval(function() {
 	
 	var o = output.shift();
 	
 	if(o){
-		process.stdout.write(highlightText(o.replace(/\r\n\r\n/gm, "\r\n")) + '\r\n');
+		var l = highlightText(o.replace(/\r\n\r\n/gm, "\r\n")) + '\r\n';
+		if(hideDupeLines && lastLine != l){
+			lastLine = l;
+			process.stdout.write(l);
+		}else{
+			process.stdout.write(l);
+		}
 	}
 	
 	if (looping) return;
@@ -281,7 +290,7 @@ function highlightText(text){
 				hex_str[i] = color.yellow + hex_str[i]+color.white;
 				hexAr.push(hex_str[i]);
 			}
-			text = "["+hexAr.join(",")+"]"
+			text = "("+hexAr.length+")["+hexAr.join(",")+"]"
 		}
 		
 	}
