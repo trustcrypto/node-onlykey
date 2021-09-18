@@ -81,7 +81,7 @@ module.exports = function(imports, onlykeyApi) {
         var xdecoded = arrayBufToBase64UrlDecode(ePub.split(".")[0]);
         var ydecoded = arrayBufToBase64UrlDecode(ePub.split(".")[1]);
         
-        var publicKeyRawBuffer = Uint8Array.from([].concat(Array.from(xdecoded)).concat(Array.from(ydecoded)).concat([0]));
+        var publicKeyRawBuffer = Uint8Array.from([].concat(Array.from(xdecoded)).concat(Array.from(ydecoded)).concat([4]));
         
         if (callback)
             callback(publicKeyRawBuffer);
@@ -197,7 +197,7 @@ module.exports = function(imports, onlykeyApi) {
 
             console.log("-------------------------------------------");
             // msg("Requesting OnlyKey Secure Connection (" + getOS() + ")");
-            // $onStatus("Requesting OnlyKey Secure Connection");
+            api.emit("status", "Requesting OnlyKey Secure Connection");
 
             var cmd = OKCMD.OKCONNECT;
 
@@ -216,7 +216,7 @@ module.exports = function(imports, onlykeyApi) {
 
                 if (!response.data) {
                     // msg("Problem setting time on onlykey");
-                    // $onStatus("Problem setting time on onlykey");
+                    api.emit("status", "Problem setting time on onlykey");
                     return;
                 }
                 response = response.data;
@@ -249,7 +249,7 @@ module.exports = function(imports, onlykeyApi) {
 
                 //msg("message -> " + message)
                 // msg("OnlyKey " + OKversion + " " + FWversion + " connection established\n");
-                // $onStatus("OnlyKey " + FWversion + " Connection Established");
+                api.emit("status", "OnlyKey " + FWversion + " Connection Established");
 
                 async_sha256(sharedsec).then((key) => {
                     console.log("AES Key", bytes2b64(key));
@@ -264,7 +264,7 @@ module.exports = function(imports, onlykeyApi) {
 
             console.log("-------------------------------------------");
             // msg("Requesting OnlyKey Derive Public Key");
-            // $onStatus("Requesting OnlyKey Derive Public Key");
+            api.emit("status", "Requesting OnlyKey Derive Public Key");
 
             var cmd = OKCMD.OKCONNECT;
             //Add header and message type
@@ -302,7 +302,7 @@ module.exports = function(imports, onlykeyApi) {
 
                 if (!response.data) {
                     // msg("Problem setting time on onlykey");
-                    // $onStatus("Problem setting time on onlykey");
+                    api.emit("status", "Problem setting time on onlykey");
                     return;
                 }
                 response = response.data;
@@ -336,7 +336,7 @@ module.exports = function(imports, onlykeyApi) {
                 }
                 // msg("OnlyKey Derive Public Key Complete");
 
-                // $onStatus("OnlyKey Derive Public Key Completed ");
+                api.emit("status", "OnlyKey Derive Public Key Completed ");
                 console.info("sharedPub", sharedPub);
 
 
@@ -363,7 +363,7 @@ module.exports = function(imports, onlykeyApi) {
                 pubkey = decode_key(pubkey);
             console.log("-------------------------------------------");
             // msg("Requesting OnlyKey Shared Secret");
-            // $onStatus("Requesting OnlyKey Shared Secret");
+            api.emit("status", "Requesting OnlyKey Shared Secret");
 
             var cmd = OKCMD.OKCONNECT;
             //Add header and message type
@@ -408,7 +408,7 @@ module.exports = function(imports, onlykeyApi) {
 
                 if (!response.data) {
                     // msg("Problem setting time on onlykey");
-                    // $onStatus("Problem setting time on onlykey");
+                    api.emit("status", "Problem setting time on onlykey");
                     return;
                 }
                 response = response.data;
@@ -443,7 +443,7 @@ module.exports = function(imports, onlykeyApi) {
                 console.info("sharedsec", sharedsec);
 
                 // msg("OnlyKey Shared Secret Completed\n");
-                // $onStatus("OnlyKey Shared Secret Completed ");
+                api.emit("status", "OnlyKey Shared Secret Completed ");
 
                 var _k; //key to export in AESGCM hex;
 
