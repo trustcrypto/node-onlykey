@@ -1,6 +1,6 @@
 module.exports = {
     consumes: ["app", "console", "window"],
-    provides: ["onlykeyApi", "kbpgp", "forge", "nacl", "pgpDecoder", "onlykey3rd"],
+    provides: ["onlykeyApi", "forge", "nacl", "onlykey3rd"],
     setup: function(options, imports, register) {
         
         Uint8Array.prototype.toHexString = function(){
@@ -9,15 +9,16 @@ module.exports = {
             return ret.join(" ");
         }
 
-        imports.kbpgp = require('./onlykey/kbpgp-2.1.0.ok.ecc.js');
-        imports.nacl = require('./onlykey/nacl.js');
-        imports.forge = require('./onlykey/forge.js');
-        imports.pgpDecoder = require('./onlykey/pgp-decoder/pgp.decoder.js');
+        // imports.kbpgp = require('./onlykey/kbpgp-2.1.0.ok.ecc.js');
+        imports.nacl = require('./onlykey/nacl.min.js');
+        imports.forge = require('./onlykey/forge.min.js');
+        // imports.pgpDecoder = require('./onlykey/pgp-decoder/pgp.decoder.js');
 
         const onlykeyApi = require('./onlykey/onlykey-api.js')(imports);
-        const onlykeyPGP = require('./onlykey/onlykey-pgp.js')(imports);
+        // const onlykeyPGP = require('./onlykey/onlykey-pgp.js')(imports);
         const onlykey3rd = require('./onlykey/onlykey-3rd-party.js')(imports, onlykeyApi);
-
+        
+        /*
         const request = require('superagent');
         var getKey = function getKey(url, statusFn_force) {
             var statusFn, force;
@@ -112,19 +113,21 @@ module.exports = {
         };
         onlykeyApi.getKey = getKey;
         
+        */
+        
         register(null, {
             onlykeyApi: {
                 api: onlykeyApi,
-                pgp: function(use_virtue) {
-                    return onlykeyPGP(onlykeyApi, use_virtue);
-                },
+                // pgp: function(use_virtue) {
+                //     return onlykeyPGP(onlykeyApi, use_virtue);
+                // },
                 onlykey3rd: onlykey3rd,
             },
             onlykey3rd: onlykey3rd,
-            kbpgp: imports.kbpgp(false,imports.console),
+            // kbpgp: imports.kbpgp(false,imports.console),
             forge: imports.forge,
             nacl: imports.nacl,
-            pgpDecoder: imports.pgpDecoder
+            // pgpDecoder: imports.pgpDecoder
         });
 
 

@@ -4,7 +4,7 @@ module.exports = function(imports) {
 
   var console = imports.console;
 
-  var forge = require("./forge.min.js");
+  var forge = imports.forge;// require("./forge.js");
 
   var $exports = {};
 

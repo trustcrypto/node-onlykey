@@ -5,7 +5,9 @@
   "main": "dist/onlykey3rd-party.js",
   "scripts": {
     "build": "cross-env NODE_ENV=development webpack --devtool source-map --config webpack.config.js",
-    "build-min": "cross-env MINIFY=1 NODE_ENV=production webpack --devtool source-map --config webpack.config.js"
+    "build-min": "cross-env MINIFY=1 NODE_ENV=production webpack --devtool source-map --config webpack.config.js",
+    "build-verbose": "cross-env NODE_ENV=development webpack --devtool source-map --config webpack.config.js  --stats verbose",
+    "build-min-verbose": "cross-env MINIFY=1 NODE_ENV=production webpack --devtool source-map --config webpack.config.js --stats verbose"
   },
   "author": "Bradley Matusiak",
   "license": "Apache-2.0",
@@ -18,6 +20,7 @@
     "file-saver": "^2.0.5",
     "jszip": "^3.7.1",
     "minimist": "^1.2.5",
+    "node-forge": "^0.10.0",
     "node-hid": "^2.1.1",
     "node-webcrypto-shim": "0.0.1",
     "superagent": "^6.1.0"

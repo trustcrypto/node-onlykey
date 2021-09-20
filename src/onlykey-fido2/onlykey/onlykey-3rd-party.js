@@ -1,7 +1,8 @@
 module.exports = function(imports, onlykeyApi) {
     /* global TextEncoder */
     // var $ = require("jquery");
-    var nacl = require("./nacl.min.js");
+    var nacl = imports.nacl;
+    var forge = imports.forge;
     var EventEmitter = require("events").EventEmitter;
     
     var console = imports.console;
@@ -249,7 +250,7 @@ module.exports = function(imports, onlykeyApi) {
 
                 //msg("message -> " + message)
                 // msg("OnlyKey " + OKversion + " " + FWversion + " connection established\n");
-                api.emit("status", "OnlyKey " + FWversion + " Connection Established");
+                api.emit("status", "OnlyKey: Connection Established, Firmware " + FWversion + ", Time Set!");
 
                 async_sha256(sharedsec).then((key) => {
                     console.log("AES Key", bytes2b64(key));
@@ -264,7 +265,7 @@ module.exports = function(imports, onlykeyApi) {
 
             console.log("-------------------------------------------");
             // msg("Requesting OnlyKey Derive Public Key");
-            api.emit("status", "Requesting OnlyKey Derive Public Key");
+            api.emit("status", "OnlyKey: Requesting Derived Public Key");
 
             var cmd = OKCMD.OKCONNECT;
             //Add header and message type
@@ -298,11 +299,12 @@ module.exports = function(imports, onlykeyApi) {
             var keyAction = press_required ? KEYACTION.DERIVE_PUBLIC_KEY_REQ_PRESS : KEYACTION.DERIVE_PUBLIC_KEY;
 
             var enc_resp = 1;
-            await onlykeyApi.ctaphid_via_webauthn(cmd, keyAction, keytype, enc_resp, message, 6000).then(async(response) => {
+            await onlykeyApi.ctaphid_via_webauthn(cmd, keyAction, keytype, enc_resp, message, 60000).then(async(response) => {
 
                 if (!response.data) {
                     // msg("Problem setting time on onlykey");
-                    api.emit("status", "Problem setting time on onlykey");
+                    api.emit("status", "OnlyKey: Problem Requesting Derived Public Key");
+                    // api.emit("error", "");
                     return;
                 }
                 response = response.data;
@@ -336,7 +338,7 @@ module.exports = function(imports, onlykeyApi) {
                 }
                 // msg("OnlyKey Derive Public Key Complete");
 
-                api.emit("status", "OnlyKey Derive Public Key Completed ");
+                api.emit("status", "OnlyKey: Requested Derived Public Key Complete");
                 console.info("sharedPub", sharedPub);
 
 
@@ -363,7 +365,7 @@ module.exports = function(imports, onlykeyApi) {
                 pubkey = decode_key(pubkey);
             console.log("-------------------------------------------");
             // msg("Requesting OnlyKey Shared Secret");
-            api.emit("status", "Requesting OnlyKey Shared Secret");
+            api.emit("status", "OnlyKey: Requesting Shared Secret");
 
             var cmd = OKCMD.OKCONNECT;
             //Add header and message type
@@ -403,12 +405,11 @@ module.exports = function(imports, onlykeyApi) {
             var keyAction = press_required ? KEYACTION.DERIVE_SHARED_SECRET_REQ_PRESS : KEYACTION.DERIVE_SHARED_SECRET;
 
             var enc_resp = 1;
-            await onlykeyApi.ctaphid_via_webauthn(cmd, keyAction, keytype, enc_resp, message, 6000).then(async(response) => {
-
+            await onlykeyApi.ctaphid_via_webauthn(cmd, keyAction, keytype, enc_resp, message, 60000).then(async(response) => {
 
                 if (!response.data) {
                     // msg("Problem setting time on onlykey");
-                    api.emit("status", "Problem setting time on onlykey");
+                    api.emit("status", "OnlyKey: Problem Requesting Shared Secret");
                     return;
                 }
                 response = response.data;
@@ -443,7 +444,7 @@ module.exports = function(imports, onlykeyApi) {
                 console.info("sharedsec", sharedsec);
 
                 // msg("OnlyKey Shared Secret Completed\n");
-                api.emit("status", "OnlyKey Shared Secret Completed ");
+                api.emit("status", "OnlyKey: Shared Secret Complete");
 
                 var _k; //key to export in AESGCM hex;
 
@@ -474,6 +475,7 @@ module.exports = function(imports, onlykeyApi) {
         api.decode_key = decode_key;
         api.build_AESGCM = build_AESGCM;
         api.nacl = nacl;
+        api.forge = forge;
         
         return api;
     }
