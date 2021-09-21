@@ -1,7 +1,8 @@
 module.exports = function(imports, onlykeyApi) {
     /* global TextEncoder */
     // var $ = require("jquery");
-    var nacl = require("./nacl.min.js");
+    var nacl = imports.nacl;
+    var forge = imports.forge;
     var EventEmitter = require("events").EventEmitter;
     
     var console = imports.console;
@@ -81,7 +82,7 @@ module.exports = function(imports, onlykeyApi) {
         var xdecoded = arrayBufToBase64UrlDecode(ePub.split(".")[0]);
         var ydecoded = arrayBufToBase64UrlDecode(ePub.split(".")[1]);
         
-        var publicKeyRawBuffer = Uint8Array.from([].concat(Array.from(xdecoded)).concat(Array.from(ydecoded)).concat([0]));
+        var publicKeyRawBuffer = Uint8Array.from([].concat(Array.from(xdecoded)).concat(Array.from(ydecoded)).concat([4]));
         
         if (callback)
             callback(publicKeyRawBuffer);
@@ -197,7 +198,7 @@ module.exports = function(imports, onlykeyApi) {
 
             console.log("-------------------------------------------");
             // msg("Requesting OnlyKey Secure Connection (" + getOS() + ")");
-            // $onStatus("Requesting OnlyKey Secure Connection");
+            api.emit("status", "Requesting OnlyKey Secure Connection");
 
             var cmd = OKCMD.OKCONNECT;
 
@@ -216,14 +217,15 @@ module.exports = function(imports, onlykeyApi) {
 
                 if (!response.data) {
                     // msg("Problem setting time on onlykey");
-                    // $onStatus("Problem setting time on onlykey");
+                    api.emit("status", "Problem setting time on onlykey");
                     return;
                 }
                 response = response.data;
 
                 var okPub = response.slice(0, 32);
                 console.info("Onlykey transit public", okPub);
-
+                
+                var encrypted_response = false;
                 if (enc_resp == 1) {
                     // Decrypt with transit_key
                     var transit_key = nacl.box.before(Uint8Array.from(okPub), appKey.secretKey);
@@ -233,7 +235,7 @@ module.exports = function(imports, onlykeyApi) {
                     transit_key = await digestBuff(Uint8Array.from(transit_key)); //AES256 key sha256 hash of shared secret
                     console.info("AES Key", transit_key);
                     var encrypted = response.slice(32, response.length);
-                    response = await aesgcm_decrypt(encrypted, transit_key);
+                    encrypted_response = await aesgcm_decrypt(encrypted, transit_key);
                 }
                 
                 //   transit_key = await digestBuff(Uint8Array.from(transit_key)); //AES256 key sha256 hash of shared secret
@@ -243,13 +245,13 @@ module.exports = function(imports, onlykeyApi) {
                 //   response = await aesgcm_decrypt(encrypted, transit_key);
                 //   onlykey_api.OKversion = response[32+19] == 99 ? 'Color' : 'Go';
 
-                var FWversion = bytes2string(response.slice(32 + 8, 32 + 20));
+                var FWversion = bytes2string(response.slice(32 + 8, 32 + 19));
                 var OKversion = response[32 + 19] == 99 ? 'Color' : 'Go';
                 var sharedsec = nacl.box.before(Uint8Array.from(okPub), appKey.secretKey);
 
                 //msg("message -> " + message)
                 // msg("OnlyKey " + OKversion + " " + FWversion + " connection established\n");
-                // $onStatus("OnlyKey " + FWversion + " Connection Established");
+                api.emit("status", "OnlyKey: Connection Established, Hardware "+OKversion+", Firmware " + FWversion + ", Time Set!");
 
                 async_sha256(sharedsec).then((key) => {
                     console.log("AES Key", bytes2b64(key));
@@ -264,7 +266,7 @@ module.exports = function(imports, onlykeyApi) {
 
             console.log("-------------------------------------------");
             // msg("Requesting OnlyKey Derive Public Key");
-            // $onStatus("Requesting OnlyKey Derive Public Key");
+            api.emit("status", "OnlyKey: Requesting Derived Public Key");
 
             var cmd = OKCMD.OKCONNECT;
             //Add header and message type
@@ -298,11 +300,12 @@ module.exports = function(imports, onlykeyApi) {
             var keyAction = press_required ? KEYACTION.DERIVE_PUBLIC_KEY_REQ_PRESS : KEYACTION.DERIVE_PUBLIC_KEY;
 
             var enc_resp = 1;
-            await onlykeyApi.ctaphid_via_webauthn(cmd, keyAction, keytype, enc_resp, message, 6000).then(async(response) => {
+            await onlykeyApi.ctaphid_via_webauthn(cmd, keyAction, keytype, enc_resp, message, 60000).then(async(response) => {
 
                 if (!response.data) {
                     // msg("Problem setting time on onlykey");
-                    // $onStatus("Problem setting time on onlykey");
+                    api.emit("status", "OnlyKey: Problem Requesting Derived Public Key");
+                    // api.emit("error", "");
                     return;
                 }
                 response = response.data;
@@ -311,6 +314,7 @@ module.exports = function(imports, onlykeyApi) {
                 var sharedPub;
                 var okPub = response.slice(0, 32);
 
+                var encrypted_response = false;
                 if (enc_resp == 1) {
                     // Decrypt with transit_key
                     var transit_key = nacl.box.before(Uint8Array.from(okPub), appKey.secretKey);
@@ -320,24 +324,24 @@ module.exports = function(imports, onlykeyApi) {
                     transit_key = Uint8Array.from(transit_key); //await digestBuff(Uint8Array.from(transit_key)); //AES256 key sha256 hash of shared secret
                     console.info("AES Key", transit_key);
                     var encrypted = response.slice(32, response.length);
-                    response = await aesgcm_decrypt(encrypted, transit_key);
+                    encrypted_response = await aesgcm_decrypt(encrypted, transit_key);
                 }
 
                 // OnlyKey version and model info
-                var FWversion = bytes2string(response.slice(32 + 8, 32 + 20));
-                var OKversion = response[32 + 19] == 99 ? 'Color' : 'Go';
+                var FWversion = bytes2string(response.slice(8, 19));
+                var OKversion = response[19] == 99 ? 'Color' : 'Go';
 
                 // Public ECC key will be an uncompressed ECC key, 65 bytes for P256, 32 bytes for NACL/CURVE25519 
                 if (keytype == KEYTYPE.CURVE25519 || keytype == KEYTYPE.NACL) {
-                    sharedPub = response.slice(response.length - (32), response.length);
+                    sharedPub = encrypted_response.slice(encrypted_response.length - (32), encrypted_response.length);
                 }
                 else {
-                    sharedPub = response.slice(response.length - (65), response.length);
+                    sharedPub = encrypted_response.slice(encrypted_response.length - (65), encrypted_response.length);
                 }
                 // msg("OnlyKey Derive Public Key Complete");
 
-                // $onStatus("OnlyKey Derive Public Key Completed ");
-                console.info("sharedPub", sharedPub);
+                api.emit("status", "OnlyKey: Requested Derived Public Key Complete");
+                console.info("sharedPub", encode_key(sharedPub), sharedPub);
 
 
                 if (keytype == KEYTYPE.P256R1) { //KEYTYPE_P256R1
@@ -351,8 +355,7 @@ module.exports = function(imports, onlykeyApi) {
                 }
 
             });
-
-
+            
         }
 
         api.derive_shared_secret = async function(additional_d, pubkey, keytype, press_required, cb) {
@@ -363,7 +366,7 @@ module.exports = function(imports, onlykeyApi) {
                 pubkey = decode_key(pubkey);
             console.log("-------------------------------------------");
             // msg("Requesting OnlyKey Shared Secret");
-            // $onStatus("Requesting OnlyKey Shared Secret");
+            api.emit("status", "OnlyKey: Requesting Shared Secret");
 
             var cmd = OKCMD.OKCONNECT;
             //Add header and message type
@@ -403,12 +406,11 @@ module.exports = function(imports, onlykeyApi) {
             var keyAction = press_required ? KEYACTION.DERIVE_SHARED_SECRET_REQ_PRESS : KEYACTION.DERIVE_SHARED_SECRET;
 
             var enc_resp = 1;
-            await onlykeyApi.ctaphid_via_webauthn(cmd, keyAction, keytype, enc_resp, message, 6000).then(async(response) => {
-
+            await onlykeyApi.ctaphid_via_webauthn(cmd, keyAction, keytype, enc_resp, message, 60000).then(async(response) => {
 
                 if (!response.data) {
                     // msg("Problem setting time on onlykey");
-                    // $onStatus("Problem setting time on onlykey");
+                    api.emit("status", "OnlyKey: Problem Requesting Shared Secret");
                     return;
                 }
                 response = response.data;
@@ -416,6 +418,7 @@ module.exports = function(imports, onlykeyApi) {
                 var sharedPub;
                 var okPub = response.slice(0, 32);
 
+                var encrypted_response = false;
                 if (enc_resp == 1) {
                     // Decrypt with transit_key
                     var transit_key = nacl.box.before(Uint8Array.from(okPub), appKey.secretKey);
@@ -423,27 +426,27 @@ module.exports = function(imports, onlykeyApi) {
                     transit_key = Uint8Array.from(transit_key); //await digestBuff(Uint8Array.from(transit_key)); //AES256 key sha256 hash of shared secret
                     console.info("AES Key", transit_key);
                     var encrypted = response.slice(32, response.length);
-                    response = await aesgcm_decrypt(encrypted, transit_key);
+                    encrypted_response = await aesgcm_decrypt(encrypted, transit_key);
                 }
 
-                var FWversion = bytes2string(response.slice(32 + 8, 32 + 20));
-                var OKversion = response[32 + 19] == 99 ? 'Color' : 'Go';
+                var FWversion = bytes2string(encrypted_response.slice(8, 19));
+                var OKversion = encrypted_response[19] == 99 ? 'Color' : 'Go';
 
                 // Public ECC key will be an uncompressed ECC key, 65 bytes for P256, 32 bytes for NACL/CURVE25519 
                 if (keytype == KEYTYPE.NACL || keytype == KEYTYPE.CURVE25519) {
-                    sharedPub = response.slice(response.length - (32 + 32), response.length - 32);
+                    sharedPub = encrypted_response.slice(encrypted_response.length - (32 + 32), encrypted_response.length - 32);
                 }
                 else {
-                    sharedPub = response.slice(response.length - (32 + 65), response.length - 32);
+                    sharedPub = encrypted_response.slice(encrypted_response.length - (32 + 65), encrypted_response.length - 32);
                 }
                 //Private ECC key will be 32 bytes for all supported ECC key types
-                var sharedsec = response.slice(response.length - 32, response.length);
+                var sharedsec = encrypted_response.slice(encrypted_response.length - 32, encrypted_response.length);
 
-                console.info("sharedPub", sharedPub);
-                console.info("sharedsec", sharedsec);
+                console.info("sharedPub", encode_key(sharedPub), sharedPub);
+                console.info("sharedsec", encode_key(sharedsec), sharedsec);
 
                 // msg("OnlyKey Shared Secret Completed\n");
-                // $onStatus("OnlyKey Shared Secret Completed ");
+                api.emit("status", "OnlyKey: Shared Secret Complete");
 
                 var _k; //key to export in AESGCM hex;
 
@@ -456,7 +459,7 @@ module.exports = function(imports, onlykeyApi) {
                     console.log("ONLYLEY: derivedBits raw => " , Uint8Array.from(sharedsec));
                     console.log("derivedBits -> AES-GCM =", _k);
 
-                    if (typeof cb === 'function') cb(null, _k);
+                    if (typeof cb === 'function') cb(null, _k, encode_key(sharedPub));
                 }
                 else if (keytype == KEYTYPE.CURVE25519 || keytype == KEYTYPE.NACL) {
                     // var ssHex = hex_encode(sharedsec)
@@ -464,7 +467,7 @@ module.exports = function(imports, onlykeyApi) {
                     console.log("ONLYLEY: derivedBits raw => " , Uint8Array.from(sharedsec));
                     console.log("derivedBits -> AES-GCM =", _k);
                     _k = await build_AESGCM(sharedsec);
-                    if (typeof cb === 'function') cb(null, _k);
+                    if (typeof cb === 'function') cb(null, _k, encode_key(sharedPub));
                 }
 
             });
@@ -474,6 +477,7 @@ module.exports = function(imports, onlykeyApi) {
         api.decode_key = decode_key;
         api.build_AESGCM = build_AESGCM;
         api.nacl = nacl;
+        api.forge = forge;
         
         return api;
     }

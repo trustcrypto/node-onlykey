@@ -38,7 +38,6 @@ List of events
 
 * `"status"`  outputs current operation in english
 * `"error"`   emits any errors during operations
-* `"debug"`   outpus any debug and status in english, _like `status` but more details_
 
 
 Methods
@@ -51,19 +50,20 @@ ok.connect(function() {})
 
 
 ```js
-ok.derive_public_key(AdditionalData, keyType, press_required, function(error, jwk_epub) {})
+ok.derive_public_key(AdditionalData, keyType, press_required, function(error, ok_jwk_epub) {})
 ```
 
 `derive_public_key()` does `connect()` and returns a hardware generated public key from OnlyKey
 
 ```js
-ok.derive_shared_secret(AdditionalData, jwk_epub, keyType, press_required, function(error, shared_secret) {})
+ok.derive_shared_secret(AdditionalData, input_jwk_epub, keyType, press_required, function(error, shared_secret, ok_jwk_epub) {})
 ```
 
 `derive_shared_secret()` does `connect()` and returns a hardware generated shared secret from OnlyKey that can be used as private key for encryption/signing
 
 *   `AdditionalData` = `string` or `buffer` to point to a derived key
-*   `jwk_epub` = input public key in jwk format
+*   `input_jwk_epub` = input public key in jwk format
+*   `ok_jwk_epub` = onlykey output public key in jwk format
 *   `keyType` = key generation type
 *   `shared_secret`  = shared AES-GCM key
 

@@ -8,7 +8,7 @@ module.exports = function(imports) {
   var onlykey_api = new EventEmitter();
 
 
-  var nacl = require("./nacl.min.js");
+  var nacl = imports.nacl;//require("./nacl.js");
 
   onlykey_api._status;
   onlykey_api.poll_delay;
@@ -339,14 +339,15 @@ module.exports = function(imports) {
       }],
       timeout: timeout,
       //rpId: 'apps.crp.to',
-      rpId: id,
+      // rpId: id,
       userVerification: 'discouraged',
-      //userPresence: 'false',
+      // userVerification: 'required',
+      // userPresence: true,
       //mediation: 'silent',
-      extensions: {
-        // appid: 'https://apps.crp.to',
-        appid: 'https://' + id
-      },
+      // extensions: {
+      //   // appid: 'https://apps.crp.to',
+      //   appid: 'https://' + id
+      // },
     };
     
     return new Promise(async function(resolve) {
