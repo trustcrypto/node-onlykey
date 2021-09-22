@@ -25,9 +25,9 @@ if (args.serial) {
 
 var plugins = [];
 
-plugins.push(require("./onlykey-fido2/plugin.js")); //load onlykey plugin for testing
-
 plugins.push(require("./window.js")); //load replacement onlykey need for plugin
+
+plugins.push(require("./onlykey-fido2/plugin.js")); //load onlykey plugin for testing
 
 plugins.push(require("./console/console.js")); //load replacement onlykey need for plugin
 
