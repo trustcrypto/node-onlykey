@@ -20,7 +20,7 @@ $window.navigator = {
     }
 };
 
-if (typeof window == undefined && !(typeof window == undefined))
+if (typeof window == 'undefined' && !(typeof global == 'undefined'))
     global.window = $window;
     
 module.exports = {
