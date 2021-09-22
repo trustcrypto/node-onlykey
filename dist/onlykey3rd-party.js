@@ -2129,7 +2129,8 @@ module.exports = function(imports, onlykeyApi) {
 
                 var okPub = response.slice(0, 32);
                 console.info("Onlykey transit public", okPub);
-
+                
+                var encrypted_response = false;
                 if (enc_resp == 1) {
                     // Decrypt with transit_key
                     var transit_key = nacl.box.before(Uint8Array.from(okPub), appKey.secretKey);
@@ -2139,7 +2140,7 @@ module.exports = function(imports, onlykeyApi) {
                     transit_key = await digestBuff(Uint8Array.from(transit_key)); //AES256 key sha256 hash of shared secret
                     console.info("AES Key", transit_key);
                     var encrypted = response.slice(32, response.length);
-                    response = await aesgcm_decrypt(encrypted, transit_key);
+                    encrypted_response = await aesgcm_decrypt(encrypted, transit_key);
                 }
                 
                 //   transit_key = await digestBuff(Uint8Array.from(transit_key)); //AES256 key sha256 hash of shared secret
@@ -2149,13 +2150,13 @@ module.exports = function(imports, onlykeyApi) {
                 //   response = await aesgcm_decrypt(encrypted, transit_key);
                 //   onlykey_api.OKversion = response[32+19] == 99 ? 'Color' : 'Go';
 
-                var FWversion = bytes2string(response.slice(32 + 8, 32 + 20));
+                var FWversion = bytes2string(response.slice(32 + 8, 32 + 19));
                 var OKversion = response[32 + 19] == 99 ? 'Color' : 'Go';
                 var sharedsec = nacl.box.before(Uint8Array.from(okPub), appKey.secretKey);
 
                 //msg("message -> " + message)
                 // msg("OnlyKey " + OKversion + " " + FWversion + " connection established\n");
-                api.emit("status", "OnlyKey: Connection Established, Firmware " + FWversion + ", Time Set!");
+                api.emit("status", "OnlyKey: Connection Established, Hardware "+OKversion+", Firmware " + FWversion + ", Time Set!");
 
                 async_sha256(sharedsec).then((key) => {
                     console.log("AES Key", bytes2b64(key));
@@ -2218,6 +2219,7 @@ module.exports = function(imports, onlykeyApi) {
                 var sharedPub;
                 var okPub = response.slice(0, 32);
 
+                var encrypted_response = false;
                 if (enc_resp == 1) {
                     // Decrypt with transit_key
                     var transit_key = nacl.box.before(Uint8Array.from(okPub), appKey.secretKey);
@@ -2227,24 +2229,24 @@ module.exports = function(imports, onlykeyApi) {
                     transit_key = Uint8Array.from(transit_key); //await digestBuff(Uint8Array.from(transit_key)); //AES256 key sha256 hash of shared secret
                     console.info("AES Key", transit_key);
                     var encrypted = response.slice(32, response.length);
-                    response = await aesgcm_decrypt(encrypted, transit_key);
+                    encrypted_response = await aesgcm_decrypt(encrypted, transit_key);
                 }
 
                 // OnlyKey version and model info
-                var FWversion = bytes2string(response.slice(32 + 8, 32 + 20));
-                var OKversion = response[32 + 19] == 99 ? 'Color' : 'Go';
+                var FWversion = bytes2string(response.slice(8, 19));
+                var OKversion = response[19] == 99 ? 'Color' : 'Go';
 
                 // Public ECC key will be an uncompressed ECC key, 65 bytes for P256, 32 bytes for NACL/CURVE25519 
                 if (keytype == KEYTYPE.CURVE25519 || keytype == KEYTYPE.NACL) {
-                    sharedPub = response.slice(response.length - (32), response.length);
+                    sharedPub = encrypted_response.slice(encrypted_response.length - (32), encrypted_response.length);
                 }
                 else {
-                    sharedPub = response.slice(response.length - (65), response.length);
+                    sharedPub = encrypted_response.slice(encrypted_response.length - (65), encrypted_response.length);
                 }
                 // msg("OnlyKey Derive Public Key Complete");
 
                 api.emit("status", "OnlyKey: Requested Derived Public Key Complete");
-                console.info("sharedPub", sharedPub);
+                console.info("sharedPub", encode_key(sharedPub), sharedPub);
 
 
                 if (keytype == KEYTYPE.P256R1) { //KEYTYPE_P256R1
@@ -2258,8 +2260,7 @@ module.exports = function(imports, onlykeyApi) {
                 }
 
             });
-
-
+            
         }
 
         api.derive_shared_secret = async function(additional_d, pubkey, keytype, press_required, cb) {
@@ -2322,6 +2323,7 @@ module.exports = function(imports, onlykeyApi) {
                 var sharedPub;
                 var okPub = response.slice(0, 32);
 
+                var encrypted_response = false;
                 if (enc_resp == 1) {
                     // Decrypt with transit_key
                     var transit_key = nacl.box.before(Uint8Array.from(okPub), appKey.secretKey);
@@ -2329,24 +2331,24 @@ module.exports = function(imports, onlykeyApi) {
                     transit_key = Uint8Array.from(transit_key); //await digestBuff(Uint8Array.from(transit_key)); //AES256 key sha256 hash of shared secret
                     console.info("AES Key", transit_key);
                     var encrypted = response.slice(32, response.length);
-                    response = await aesgcm_decrypt(encrypted, transit_key);
+                    encrypted_response = await aesgcm_decrypt(encrypted, transit_key);
                 }
 
-                var FWversion = bytes2string(response.slice(32 + 8, 32 + 20));
-                var OKversion = response[32 + 19] == 99 ? 'Color' : 'Go';
+                var FWversion = bytes2string(encrypted_response.slice(8, 19));
+                var OKversion = encrypted_response[19] == 99 ? 'Color' : 'Go';
 
                 // Public ECC key will be an uncompressed ECC key, 65 bytes for P256, 32 bytes for NACL/CURVE25519 
                 if (keytype == KEYTYPE.NACL || keytype == KEYTYPE.CURVE25519) {
-                    sharedPub = response.slice(response.length - (32 + 32), response.length - 32);
+                    sharedPub = encrypted_response.slice(encrypted_response.length - (32 + 32), encrypted_response.length - 32);
                 }
                 else {
-                    sharedPub = response.slice(response.length - (32 + 65), response.length - 32);
+                    sharedPub = encrypted_response.slice(encrypted_response.length - (32 + 65), encrypted_response.length - 32);
                 }
                 //Private ECC key will be 32 bytes for all supported ECC key types
-                var sharedsec = response.slice(response.length - 32, response.length);
+                var sharedsec = encrypted_response.slice(encrypted_response.length - 32, encrypted_response.length);
 
-                console.info("sharedPub", sharedPub);
-                console.info("sharedsec", sharedsec);
+                console.info("sharedPub", encode_key(sharedPub), sharedPub);
+                console.info("sharedsec", encode_key(sharedsec), sharedsec);
 
                 // msg("OnlyKey Shared Secret Completed\n");
                 api.emit("status", "OnlyKey: Shared Secret Complete");
@@ -2362,7 +2364,7 @@ module.exports = function(imports, onlykeyApi) {
                     console.log("ONLYLEY: derivedBits raw => " , Uint8Array.from(sharedsec));
                     console.log("derivedBits -> AES-GCM =", _k);
 
-                    if (typeof cb === 'function') cb(null, _k);
+                    if (typeof cb === 'function') cb(null, _k, encode_key(sharedPub));
                 }
                 else if (keytype == KEYTYPE.CURVE25519 || keytype == KEYTYPE.NACL) {
                     // var ssHex = hex_encode(sharedsec)
@@ -2370,7 +2372,7 @@ module.exports = function(imports, onlykeyApi) {
                     console.log("ONLYLEY: derivedBits raw => " , Uint8Array.from(sharedsec));
                     console.log("derivedBits -> AES-GCM =", _k);
                     _k = await build_AESGCM(sharedsec);
-                    if (typeof cb === 'function') cb(null, _k);
+                    if (typeof cb === 'function') cb(null, _k, encode_key(sharedPub));
                 }
 
             });
