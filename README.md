@@ -1,12 +1,15 @@
 # node-onlykey
 
+# STATUS: ALPHA
+
 Get a Onlykey USB: [https://onlykey.io/sea](https://onlykey.io/sea)
 
 Live Demo for 3rd Party: [https://docs.crp.to/node-onlykey/docs/](https://docs.crp.to/node-onlykey/docs/)
 
+Please Leave Feedback Here [https://github.com/trustcrypto/node-onlykey/issues](https://github.com/trustcrypto/node-onlykey/issues)
 ------
 
-3rd Party Support
+Onlykey 3rd Party API
 ---
 
 Supports
