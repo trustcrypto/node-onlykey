@@ -1,16 +1,16 @@
 # node-onlykey
 
-# STATUS: ALPHA
+## STATUS: ALPHA
 
 Get an Onlykey: [https://onlykey.io/](https://onlykey.io/)
 
-Live Demo for 3rd Party: [https://docs.crp.to/node-onlykey/docs/](https://docs.crp.to/node-onlykey/docs/)
+Live Demo: [https://docs.crp.to/node-onlykey/docs/](https://docs.crp.to/node-onlykey/docs/)
 
 Please Leave Feedback Here [https://github.com/trustcrypto/node-onlykey/issues](https://github.com/trustcrypto/node-onlykey/issues)
-------
 
 Onlykey 3rd Party API
----
+----
+
 
 Supports
 * ECDH and ECDSA (NIST256P1)
@@ -84,6 +84,13 @@ OnlyKey uses the RPID provided from FIDO2 (the origin url), the input public key
 Single-User Application - This shared secret can be used for encryption and signing purposes. Given the same inputs and the same web site origin the same shared secret can be recreated. 
 
 Multi-User Application - Like a typical ECDH key exchange, both USERA and USERB obtain hardware generated public keys with `derive_public_key()`, these public keys are exchanged and used as input public key for `derive_shared_secret()`. Each user generates the same shared secret which can be used for encryption and signing purposes between USERA and USERB.
+
+Run Demo Locally
+-----------
+```
+$ node node-onlykey/docs/server.js 
+```
+Browse to http://localhost:3000
 
 API Authors
 -----------
