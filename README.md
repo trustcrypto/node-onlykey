@@ -2,7 +2,7 @@
 
 # STATUS: ALPHA
 
-Get a Onlykey USB: [https://onlykey.io/sea](https://onlykey.io/sea)
+Get an Onlykey: [https://onlykey.io/](https://onlykey.io/)
 
 Live Demo for 3rd Party: [https://docs.crp.to/node-onlykey/docs/](https://docs.crp.to/node-onlykey/docs/)
 
