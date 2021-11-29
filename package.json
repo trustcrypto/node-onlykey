@@ -14,7 +14,7 @@
   "repository": "github:trustcrypto/node-onlykey",
   "homepage": "https://github.com/trustcrypto/node-onlykey#readme",
   "dependencies": {
-    "@vincss-public-projects/fido2-client": "github:bmatusiak/FIDO2Client#c50cb53c36d2855f71190959f5f78ea7fa74998c",
+    "@vincss-public-projects/fido2-client": "github:trustcrypto/FIDO2Client#c50cb53c36d2855f71190959f5f78ea7fa74998c",
     "atob": "^2.1.2",
     "btoa": "^1.2.1",
     "file-saver": "^2.0.5",
