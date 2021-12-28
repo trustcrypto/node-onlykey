@@ -194,7 +194,6 @@ module.exports = function(imports) {
   }
 
   $exports.getOS = function getOS() {
-
     if (typeof window == "undefined" || window.navigator.userAgent == "NODE") {
       os = "Node";
       return os;
@@ -223,6 +222,23 @@ module.exports = function(imports) {
     }
 
     return os;
+  }
+  
+  
+  $exports.getBrowser = function getBrowser() {
+    
+    if(typeof window == "undefined"){
+      browser = "Node";
+      return browser;
+    }
+    var vendor = window.navigator.vendor,
+      browser = 'Google';
+
+    if (vendor.indexOf('Apple') > -1) {
+      browser = 'Apple';
+    }
+
+    return browser;
   }
 
 
