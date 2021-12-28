@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@vincss-public-projects/fido2-client": "git+https://github.com/bmatusiak/FIDO2Client.git",
+    "@vincss-public-projects/fido2-client": "git+https://github.com/trustcrypto/FIDO2Client.git",
     "atob": "^2.1.2",
     "btoa": "^1.2.1",
     "node-hid": "^2.1.1",

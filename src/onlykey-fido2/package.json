@@ -8,16 +8,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bmatusiak/node-onlykey-fido2.git"
+    "url": "git+https://github.com/trustcrypto/node-onlykey.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/bmatusiak/node-onlykey-fido2/issues"
+    "url": "https://github.com/trustcrypto/node-onlykey/issues"
   },
-  "homepage": "https://github.com/bmatusiak/node-onlykey-fido2#readme",
+  "homepage": "https://github.com/trustcrypto/node-onlykey#readme",
   "dependencies": {
-    "@vincss-public-projects/fido2-client": "git+https://github.com/bmatusiak/FIDO2Client.git",
+    "@vincss-public-projects/fido2-client": "git+https://github.com/trustcrypto/FIDO2Client.git",
     "atob": "^2.1.2",
     "btoa": "^1.2.1",
     "file-saver": "^2.0.2",

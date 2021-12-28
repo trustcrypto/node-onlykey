@@ -194,7 +194,6 @@ module.exports = function(imports) {
   }
 
   $exports.getOS = function getOS() {
-    
     if (typeof window == "undefined" || window.navigator.userAgent == "NODE") {
       os = "Node";
       return os;
