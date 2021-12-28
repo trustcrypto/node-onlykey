@@ -20,6 +20,7 @@
     "file-saver": "^2.0.5",
     "jszip": "^3.7.1",
     "minimist": "^1.2.5",
+    "nexe": "^4.0.0-beta.19",
     "node-forge": "^0.10.0",
     "node-hid": "^2.1.1",
     "node-webcrypto-shim": "0.0.1",
