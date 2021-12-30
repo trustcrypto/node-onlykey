@@ -1,5 +1,5 @@
 {
-  "name": "node-onlykey",
+  "name": "@trustcrypto/node-onlykey",
   "version": "0.0.1",
   "description": "Onlykey Javascript Library",
   "main": "dist/onlykey3rd-party.js",
