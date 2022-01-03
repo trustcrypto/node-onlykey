@@ -92,6 +92,17 @@ $ node node-onlykey/docs/server.js
 ```
 Browse to http://localhost:3000
 
+CLI
+-----------
+```
+--help,-h,-?               shows this
+--keypress,-p              use touch key
+--keytype=1,-t=1           1=P256R1,3=CURVE25519
+--seed='Onlykey Rocks!'    seed for aditional_data
+--secret='pubkey'          pubkey to generate a secret from seed
+--domain='localhost'       domain to generate keys for
+```
+
 API Authors
 -----------
 * Tim ~  onlykey.io
