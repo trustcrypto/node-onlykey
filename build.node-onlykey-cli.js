@@ -4,7 +4,7 @@ var compile = nexe.compile;
 compile({
   target: "windows-x64-12.18.2",
   input: './src/cli.js',
-  output: './node-onlykey-cli.exe',
+  output: './node-onlykey.exe',
   temp: "./.tmp-nexe",
   loglevel:"verbose"
 }).then(() => {

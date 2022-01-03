@@ -5,11 +5,17 @@ var EventEmitter = require("events").EventEmitter;
 
 var $window = new EventEmitter();
 
-$window.crypto = require("node-webcrypto-shim");
+// $window.crypto = require("node-webcrypto-shim");
+const WebCrypto = require('node-webcrypto-ossl');
+const webcrypto = new WebCrypto({
+//   directory: `${process.env.HOME}/.webcrypto/keys`
+});
+$window.crypto = webcrypto;
+
 $window.atob = require("atob");
 $window.btoa = require("btoa");
 $window.location = {
-    hostname: process.env.DOMAIN || "apps.crp.to"
+    hostname: process.env.DOMAIN || "localhost"
 };
 $window.navigator = {
     userAgent: "NODE",
