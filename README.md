@@ -103,6 +103,8 @@ CLI
 --domain='localhost'       domain to generate keys for
 ```
 
+CLI outputs in JSON format
+
 API Authors
 -----------
 * Tim ~  onlykey.io
