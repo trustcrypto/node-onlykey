@@ -4,25 +4,48 @@
 
 var args = require('minimist')(process.argv.slice(2), {
     // '--': true,
-    boolean: ["keypress", "serial"],
+    boolean: [
+        "keypress", 
+        // "serial",
+        "help"
+    ],
     alias: {
         keytype: "t",
-        keypress: "p"
+        keypress: "p",
+        help: ["h","?"]
     },
     default: {
+        seed:"Onlykey Rocks!",
         keytype: 1,
         keypress: false,
-
-        serial: false
+        domnain:'localhost',
+        // serial: false,
+        help: false
+        
     }
 });
 
-
-if (args.serial) {
-    require("./serial.js");
+if(args.help){
+    console.log("--help,-h,-?               shows this");
+    // console.log("--serial                   developer firmware serial");
+    console.log("--keypress,-p              use touch key");
+    console.log("--keytype=1,-t=1           1=P256R1,3=CURVE25519");
+    console.log("--seed='Onlykey Rocks!'    seed for aditional_data");
+    console.log("--secret='pubkey'          pubkey to generate a secret from seed");
+    console.log("--domain='localhost'       domain to generate keys for");
+    
+    
     return;
 }
 
+// if (args.serial) {
+//     require("./serial.js");
+//     return;
+// }
+
+if(!process.env.DOMAIN && args.domain)
+    process.env.DOMAIN = args.domain;
+    
 var plugins = [];
 
 plugins.push(require("./window.js")); //load replacement onlykey need for plugin
@@ -62,23 +85,19 @@ architect.createApp(plugins, function(err, app) {
     // callback(null, app);
 
 
-
-    args.aditional_seed_data = args._[0] || "Onlykey Rocks!";
-    args.sharedPub = args._[1];
-
     var ONLYKEY = app.services.onlykey3rd(args.keytype);
 
     // ONLYKEY.connect(console.log)
 
-    if (!args.sharedPub) {
-        ONLYKEY.derive_public_key(args.aditional_seed_data, args.keytype, args.keypress, async function(err, key) {
-            console.log(JSON.stringify({ epub: key }))
+    if (!args.secret) {
+        ONLYKEY.derive_public_key(args.seed, args.keytype, args.keypress, async function(err, key) {
+            console.log(JSON.stringify({domain: process.env.DOMAIN, seed: args.seed, epub:key }))
         });
     }
     else {
 
-        ONLYKEY.derive_shared_secret(args.aditional_seed_data, args.sharedPub, args.keytype, args.keypress, async function(err, sharedSecret) {
-            console.log(JSON.stringify({ sharedSecret: sharedSecret }))
+        ONLYKEY.derive_shared_secret(args.seed, args.secret, args.keytype, args.keypress, async function(err, sharedSecret, seedKey) {
+            console.log(JSON.stringify({domain: process.env.DOMAIN, seed: args.seed, epub:seedKey, pub: args.secret, sharedSecret: sharedSecret }))
         });
     }
 });

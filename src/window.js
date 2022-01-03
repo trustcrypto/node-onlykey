@@ -9,7 +9,7 @@ $window.crypto = require("node-webcrypto-shim");
 $window.atob = require("atob");
 $window.btoa = require("btoa");
 $window.location = {
-    hostname: process.env.DOMAIN || "apps.crp.to"
+    hostname: process.env.DOMAIN || "localhost"
 };
 $window.navigator = {
     userAgent: "NODE",
