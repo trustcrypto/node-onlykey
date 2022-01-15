@@ -1832,24 +1832,23 @@ module.exports = {
   \****************************/
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-
-module.exports = function(cb){
+module.exports = function(cb, step) {
     var plugins = [];
-    
+
     plugins.push(__webpack_require__(/*! ./onlykey-fido2/plugin_3rdParty.js */ "./src/onlykey-fido2/plugin_3rdParty.js")); //load onlykey plugin for testing
-    
+
     var removeConsole = true;
-    
-    if(removeConsole)
+
+    if (removeConsole)
         plugins.push(__webpack_require__(/*! ./console/console.js */ "./src/console/console.js")); //load replacement onlykey need for plugin
     else
         plugins.push(__webpack_require__(/*! ./console/console_debug.js */ "./src/console/console_debug.js")); //load replacement onlykey need for plugin
-        
+
     var EventEmitter = (__webpack_require__(/*! events */ "./node_modules/events/events.js").EventEmitter);
-    
+
     var architect = __webpack_require__(/*! ../libs/wp_architect.js */ "./libs/wp_architect.js");
-    
-    
+
+
     plugins.push({
         provides: ["app", "window"],
         consumes: ["hub"],
@@ -1860,9 +1859,9 @@ module.exports = function(cb){
             });
         }
     });
-    
+
     architect(plugins, function(err, app) {
-    
+
         if (err) return console.error(err);
         app.services.app.core = app.services;
         for (var i in app.services) {
@@ -1871,13 +1870,17 @@ module.exports = function(cb){
         for (var i in app.services) {
             if (app.services[i].init) app.services[i].init(app);
         }
-    
-        
+
+        if (step)
+            app.services.onlykeyApi.api.step = function(p) {
+                step(p, app.services.onlykeyApi.api.extra.getBrowser());
+            };
+
         cb(app.services.onlykey3rd);
-        
-    
+
+
     });
-    
+
 
 }
 
@@ -2762,7 +2765,11 @@ module.exports = function(imports) {
     
     return new Promise(async function(resolve) {
       // return 
+      if(onlykey_api.step){
+        onlykey_api.step(proceed);
+      }else proceed();
       
+      function proceed(){
       console.log({ctaphid_request:request});
       var results = false;
       // console.log("REQUEST:", request_options);
@@ -2805,7 +2812,7 @@ module.exports = function(imports) {
         if (cb) cb(response.error, response);
         resolve(response);
       });
-
+      }
     });
 
   }
