@@ -1,21 +1,20 @@
-
-module.exports = function(cb){
+module.exports = function(cb, step) {
     var plugins = [];
-    
+
     plugins.push(require("./onlykey-fido2/plugin_3rdParty.js")); //load onlykey plugin for testing
-    
+
     var removeConsole = true;
-    
-    if(removeConsole)
+
+    if (removeConsole)
         plugins.push(require("./console/console.js")); //load replacement onlykey need for plugin
     else
         plugins.push(require("./console/console_debug.js")); //load replacement onlykey need for plugin
-        
+
     var EventEmitter = require("events").EventEmitter;
-    
+
     var architect = require("../libs/wp_architect.js");
-    
-    
+
+
     plugins.push({
         provides: ["app", "window"],
         consumes: ["hub"],
@@ -26,9 +25,9 @@ module.exports = function(cb){
             });
         }
     });
-    
+
     architect(plugins, function(err, app) {
-    
+
         if (err) return console.error(err);
         app.services.app.core = app.services;
         for (var i in app.services) {
@@ -37,13 +36,17 @@ module.exports = function(cb){
         for (var i in app.services) {
             if (app.services[i].init) app.services[i].init(app);
         }
-    
-        
+
+        if (step)
+            app.services.onlykeyApi.api.step = function(p) {
+                step(p, app.services.onlykeyApi.api.extra.getBrowser());
+            };
+
         cb(app.services.onlykey3rd);
-        
-    
+
+
     });
-    
+
 
 }
 

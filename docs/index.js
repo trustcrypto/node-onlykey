@@ -18,7 +18,59 @@ define(function(require, exports, module) {
 
     module.exports = {
         start: function(testType) {
+            var bs_modal_dialog = {
 
+                confirm: function(title, question, answers, done) {
+
+                    var m = $(
+                        `<div class="modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body"></div>
+      <div class="modal-footer"></div>
+    </div>
+  </div>
+</div>`);
+
+                    m.find(".modal-title").text(title);
+                    m.find(".modal-body").html(question);
+
+                    for (var i in answers) {
+                        ((ans) => {
+                            var b = $(`<button type="button" class="btn btn-primary">${ans}</button>`);
+                            b.click(function() {
+                                m.modal("hide");
+                                done(null, ans);
+                            });
+                            m.find(".modal-footer").append(b);
+                        })(answers[i]);
+
+                    }
+
+                    var cancel = $(`<button type="button" class="btn btn-secondary">Cancel</button>`);
+                    cancel.click(function() {
+                        m.modal("hide");
+                        done(true);
+                    });
+                    m.find(".modal-footer").append(cancel);
+
+
+                    m.on("hidden.bs.modal", function() {
+                        m.modal("dispose");
+                        m.remove();
+                    });
+
+                    m.appendTo("body");
+                    m.modal('show');
+                    return m;
+                }
+            }
             console.log("onlykeyIndex");
             require("./dist/onlykey3rd-party.js")(function(ONLYKEY) {
 
@@ -47,6 +99,7 @@ define(function(require, exports, module) {
                         $("#console_output").append($("<br/>"));
                         $("#connection_status").text(s);
                     });
+
 
                     pageLayout.find("#connect_onlykey").click(function() {
                         onlykey.connect(async function() {
@@ -134,18 +187,18 @@ define(function(require, exports, module) {
                             onlykey.derive_shared_secret(AdditionalData, JSON.parse($("#sea_test_key").val()).epub, keyType, press_required, async function(err, sharedSecret, ok_jwk_epub) {
                                 if (err) console.log(err);
                                 $("#ok_test_shared_secret").val(sharedSecret);
-                                
+
                                 pageLayout.find("#onlykey_pubkey").val(ok_jwk_epub);
                                 if ($("#encryptKey").val() == "")
-                                $("#encryptKey").val(ok_jwk_epub);
+                                    $("#encryptKey").val(ok_jwk_epub);
 
                                 if ($("#decryptKey").val() == "")
                                     $("#decryptKey").val(ok_jwk_epub);
-                                    
+
                                 var testSharedSecret = await SEA.secret({
                                     epub: ok_jwk_epub
                                 }, JSON.parse($("#sea_test_key").val()));
-                                
+
                                 $("#sea_test_shared_secret").val(testSharedSecret);
 
                             });
@@ -302,6 +355,16 @@ define(function(require, exports, module) {
                 }
 
 
+            }, function(proceed, browser) {
+                if (browser == "Apple")
+                    bs_modal_dialog.confirm("Continue",
+                        `To continue please click 'Yes' to access OnlyKey via USB`, ["Yes"],
+                        async function(cancel, ans) {
+                            if (ans == "Yes") {
+                                proceed();
+                            }
+                        });
+                else proceed();
             });
 
         }
