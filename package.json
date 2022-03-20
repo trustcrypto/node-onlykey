@@ -12,10 +12,12 @@
   "author": "Bradley Matusiak",
   "license": "Apache-2.0",
   "repository": "github:trustcrypto/node-onlykey",
-  "homepage": "https://github.com/trustcrypto/node-onlykey#readme",
+  "homepage": "https://github.com/trustcrypto/node-onlykey#readme", 
+  "optionalDependencies": {
+    "@vincss-public-projects/fido2-client": "github:trustcrypto/FIDO2Client#9c4fb7c534ec871aa9328bf2bc99b4a70fa79ea0"
+  },
   "dependencies": {
     "@peculiar/webcrypto": "^1.2.3",
-    "@vincss-public-projects/fido2-client": "github:bmatusiak/FIDO2Client#master",
     "atob": "^2.1.2",
     "btoa": "^1.2.1",
     "file-saver": "^2.0.5",
