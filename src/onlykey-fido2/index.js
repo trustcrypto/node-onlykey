@@ -1,6 +1,11 @@
 //debugger;
 
-const crypto = require('node-webcrypto-shim');
+const WebCrypto = require('@peculiar/webcrypto').Crypto ;
+const webcrypto = new WebCrypto({
+//   directory: `${process.env.HOME}/.webcrypto/keys`
+});
+const crypto = WebCrypto;
+
 const atob = require("atob");
 const btoa = require("btoa");
 

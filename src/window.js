@@ -6,7 +6,7 @@ var EventEmitter = require("events").EventEmitter;
 var $window = new EventEmitter();
 
 // $window.crypto = require("node-webcrypto-shim");
-const WebCrypto = require('node-webcrypto-ossl');
+const WebCrypto = require('@peculiar/webcrypto').Crypto ;
 const webcrypto = new WebCrypto({
 //   directory: `${process.env.HOME}/.webcrypto/keys`
 });
